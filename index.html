@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+
+    <!-- Icon untuk shortcut (Android & iOS) -->
+    <link rel="icon" href="/icon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+  
+    <!-- Web App Manifest (optional tapi disarankan) -->
+    <link rel="manifest" href="/manifest.json" />
+  
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:title" content="Jadwal Pelajaran Digital MTs. An-Nur Bululawang" />
+    <meta property="og:description" content="Monitoring jadwal pelajaran dan kegiatan belajar mengajar secara real-time." />
+    <meta property="og:image" content="https://tv-monitoring-kbm.netlify.app/banner.png" />
+    <meta property="og:url" content="https://tv-monitoring-kbm.netlify.app/" />
+    <meta property="og:type" content="website" />
+  
+    <!-- Twitter Card (optional) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jadwal Pelajaran Digital MTs. An-Nur Bululawang" />
+    <meta name="twitter:description" content="Monitoring jadwal pelajaran dan kegiatan belajar mengajar secara real-time." />
+    <meta name="twitter:image" content="https://tv-monitoring-kbm.netlify.app/banner.png" />
+  
+  <meta name="theme-color" content="#0f2027" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jadwal Pelajaran Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto&family=Rajdhani&family=Rubik:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      --text-color: #fff;
+    }
+
+    html, body {
+  height: 100%;  
+}
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Open Sans', sans-serif;
+      background: var(--bg);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .header-grid {
+  width: 97%;
+  margin: 10px auto; /* center secara horizontal */
+  display: grid;
+  grid-template-columns: 80px auto 1fr 1fr 1fr 30px; /* Tambahkan 1 kolom untuk guru piket */
+  align-items: center;
+  gap: 20px;
+  padding: 10px 16px; /* beri padding kiri-kanan lebih longgar */
+
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid #ccc;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+    @media (max-width: 599px) {
+  .header-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto; /* Tambahkan 1 baris untuk guru piket */
+    text-align: center;
+  }
+
+  .header-grid img {
+    grid-column: 1 / span 2;
+    margin: auto;
+  }
+
+  .kop {
+    grid-column: 1 / span 2;
+  }
+
+  .judul-jam {
+    grid-column: 1;
+  }
+
+  .header-kbm {
+    grid-column: 2;
+  }
+
+  .header-piket {
+    grid-column: 1 / span 2; /* Guru piket mengambil 2 kolom penuh pada mobile */
+  }
+}
+
+    @media (min-width: 600px) and (max-width: 1199px) {
+  .header-grid {
+    grid-template-columns: 80px auto 1fr 1fr 1fr 30px;
+    gap: 15px;
+  }
+}
+    
+    .header-grid img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .kop {
+      font-size: 1rem;
+      line-height: 1.6;
+      font-weight: bold;
+
+      
+    }
+
+    .kop b {
+      font-family: 'Rubik', sans-serif;
+      color: #FFD700;
+      font-size: 1.4rem;
+      
+    }
+
+    .judul-jam {
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .judul-jam .judul {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #00ffff;
+    }
+
+    #clock {
+      font-size: 2rem;
+      font-family: 'Rubik', sans-serif;
+      color: #00FF00;
+    }
+
+    #dayDate {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .header-kbm {
+      text-align: center;
+      line-height: 1;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
+      
+    }
+
+    .header-kbm .shift {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1rem;
+      color: #00ffff;
+      font-weight: bold;
+    }
+
+    .header-kbm .jamke {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .header-kbm .angka-ke {
+      font-family: 'Rubik', sans-serif;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00FF00;
+    }
+
+    .header-kbm .periode {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    /* Styling untuk kolom guru piket */
+    .header-piket {
+      text-align: center;
+      line-height: 1.2;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 180px;
+    }
+
+    .header-piket .piket-title {
+      font-family: 'Rubik', sans-serif;
+      margin-bottom: 8px;
+      font-family: 'Rubik', sans-serif;
+      font-size: 1 rem;
+      font-weight: bold;
+      color: #00ffff;
+    }
+
+    #guruPiket {
+      font-family: 'Rubik', sans-serif;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.3;
+      transition: all 0.3s ease-in-out;
+    }
+
+    #guruPiket:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive adjustments untuk guru piket */
+    @media (max-width: 1199px) {
+      .header-piket {
+        min-width: 140px;
+      }
+      
+      .header-piket .piket-title {
+        font-size: 0.9rem;
+      }
+      
+      #guruPiket {
+        font-size: 0.8rem;
+        padding: 6px;
+      }
+    }
+
+    @media (max-width: 599px) {
+      .header-piket {
+        min-width: auto;
+        margin-top: 10px;
+      }
+    }
+
+    .header-hr {
+      border: none;
+      border-top: 1px solid #ccc; /* hanya garis atas, tipis */
+  margin: 5px 15px;
+  box-sizing: border-box;
+
+}
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      justify-content: center;
+      
+    }
+
+    @media (min-width: 1200px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 1199px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 599px) {
+      .grid { grid-template-columns: repeat(1, 1fr); }
+    }
+
+    @media (min-width: 600px) and (max-width: 899px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+    .card {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #ccc;
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      gap: 12px;
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    .card:hover .kelas-box {
+      background-color: #34495e;
+      border: 2px solid #FFD700;
+      transform: rotate(5deg);
+      box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+    }
+
+    .card:hover .mapel {
+      color: #FFD700;
+      text-shadow: 0 2px 10px rgba(255,215,0,0.3);
+    }
+
+    .card:hover .guru {
+      color: #00ffff;
+      text-shadow: 0 2px 8px rgba(0,255,255,0.3);
+    }
+
+    .kelas-box {
+      width: 90px;
+      height: 90px;
+      background-color: #2c3e50;
+      border: 2px solid #ccc;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: bold;
+      color: #FFD700;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .info-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .mapel {
+      font-family: 'Rubik', sans-serif;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00ffff;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .guru {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ffffff;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .grid.center-message {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30vh;
+      width: 100%;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    #controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+  position: fixed;
+  bottom: 20px; /* Jarak tombol dari bawah layar */
+  left: 50%;
+  transform: translateX(-50%); /* Center tombol secara horizontal */
+  z-index: 10; /* Agar tombol muncul di atas konten lainnya */
+  background-color: rgba(0, 0, 0, 0.5); /* Background transparan agar tombol lebih jelas */
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  width: 90%; /* Perbesar lebar wadah agar tombol bisa terletak dengan baik */
+
+}
+
+button {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #666;
+}
+
+
+
+
+  </style>
+</head>
+<body>
+  <div class="header-grid">
+    <img src="https://tv-monitoring-kbm.netlify.app/logo.png" alt="Logo MTs. An-Nur Bululawang">
+    <div class="kop">
+      <b>MTs. AN-NUR BULULAWANG</b><br>
+      TERAKREDITASI "A"<br>
+      Jl. Raya Bululawang, Kab. Malang, Jatim 65171
+    </div>
+    <div class="judul-jam">
+      <div class="judul">E - JADWAL</div>
+      <div id="clock">--:--:--</div>
+      <div id="dayDate">Memuat tanggal...</div>
+    </div>
+    <div class="header-kbm">
+      <div class="shift" id="shiftKBM">KBM PUTRI</div>
+      <div class="jamke">Jam ke-</div>
+      <div class="angka-ke" id="angkaKe">-</div>
+      <div class="periode" id="periodeJam">(-)</div>
+    </div>
+    <!-- KOLOM GURU PIKET YANG BARU -->
+    <div class="header-piket">
+      <div class="piket-title">GURU PIKET</div>
+      <div id="guruPiket">Loading...</div>
+    </div>
+    <div></div> <!-- Kolom kosong untuk spacing -->
+  </div>
+
+  <!-- Tambahkan garis horizontal di sini -->
+  <hr class="header-hr">
+
+  <div id="gridContainer" class="grid"></div>
+
+<!-- Tambahkan dropdown setelah tombol berhenti di bagian controls -->
+<div id="controls">
+  <button onclick="nextTheme()">🎨 Tema</button>
+  <button onclick="toggleFont()">🔠 Font</button>
+  <button onclick="adjustFont(0.05)">A+</button>
+  <button onclick="adjustFont(-0.05)">A-</button>
+  <button onclick="adjustTime(-1)">🕘 -1 Jam</button>
+  <button onclick="adjustTime(1)">🕒 +1 Jam</button>
+  <button onclick="adjustMinute(-1)">🕐 -1 Menit</button>
+  <button onclick="adjustMinute(1)">🕐 +1 Menit</button>
+  <button onclick="adjustDay(-1)">📆 -1 Hari</button>
+  <button onclick="adjustDay(1)">📅 +1 Hari</button>
+  <button onclick="announceNow()">🔊 Umumkan</button>
+  <button onclick="stopAnnouncement()">🛑 Berhenti</button>
+  
+  <!-- Tambahkan dropdown untuk memilih suara -->
+  <select id="voiceSelect" onchange="changeVoice()" style="padding: 6px; background-color: #444; color: white; border: none; border-radius: 4px;">
+    <option value="">🗣️ Pilih Suara</option>
+  </select>
+</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
