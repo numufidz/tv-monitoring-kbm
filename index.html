@@ -1,42 +1,48 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
 
-    <!-- Icon untuk shortcut (Android & iOS) -->
-    <link rel="icon" href="/icon.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/icon.png" />
-  
-    <!-- Web App Manifest (optional tapi disarankan) -->
-    <link rel="manifest" href="/manifest.json" />
-  
-    <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:title" content="Jadwal Pelajaran Digital MTs. An-Nur Bululawang" />
-    <meta property="og:description" content="Monitoring jadwal pelajaran dan kegiatan belajar mengajar secara real-time." />
-    <meta property="og:image" content="https://tv-monitoring-kbm.netlify.app/banner.png" />
-    <meta property="og:url" content="https://tv-monitoring-kbm.netlify.app/" />
-    <meta property="og:type" content="website" />
-  
-    <!-- Twitter Card (optional) -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Jadwal Pelajaran Digital MTs. An-Nur Bululawang" />
-    <meta name="twitter:description" content="Monitoring jadwal pelajaran dan kegiatan belajar mengajar secara real-time." />
-    <meta name="twitter:image" content="https://tv-monitoring-kbm.netlify.app/banner.png" />
-  
+  <!-- Icon untuk shortcut (Android & iOS) -->
+  <link rel="icon" href="/icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/icon.png" />
+
+  <!-- Web App Manifest (optional tapi disarankan) -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:title" content="Jadwal Pelajaran Digital MTs. An-Nur Bululawang" />
+  <meta property="og:description"
+    content="Monitoring jadwal pelajaran dan kegiatan belajar mengajar secara real-time." />
+  <meta property="og:image" content="https://tv-monitoring-kbm.netlify.app/banner.png" />
+  <meta property="og:url" content="https://tv-monitoring-kbm.netlify.app/" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter Card (optional) -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jadwal Pelajaran Digital MTs. An-Nur Bululawang" />
+  <meta name="twitter:description"
+    content="Monitoring jadwal pelajaran dan kegiatan belajar mengajar secara real-time." />
+  <meta name="twitter:image" content="https://tv-monitoring-kbm.netlify.app/banner.png" />
+
   <meta name="theme-color" content="#0f2027" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jadwal Pelajaran Digital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto&family=Rajdhani&family=Rubik:wght@700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto&family=Rajdhani&family=Rubik:wght@700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       --text-color: #fff;
     }
 
-    html, body {
-  height: 100%;  
-}
+    html,
+    body {
+      height: 100%;
+    }
 
     body {
       margin: 0;
@@ -54,58 +60,63 @@
     }
 
     .header-grid {
-  width: 97%;
-  margin: 10px auto; /* center secara horizontal */
-  display: grid;
-  grid-template-columns: 80px auto 1fr 1fr 1fr 30px; /* Tambahkan 1 kolom untuk guru piket */
-  align-items: center;
-  gap: 20px;
-  padding: 10px 16px; /* beri padding kiri-kanan lebih longgar */
+      width: 97%;
+      margin: 10px auto;
+      /* center secara horizontal */
+      display: grid;
+      grid-template-columns: 80px auto 1fr 1fr 1fr 30px;
+      /* Tambahkan 1 kolom untuk guru piket */
+      align-items: center;
+      gap: 20px;
+      padding: 10px 16px;
+      /* beri padding kiri-kanan lebih longgar */
 
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid #ccc;
-  border-radius: 16px;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #ccc;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
 
     @media (max-width: 599px) {
-  .header-grid {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto auto; /* Tambahkan 1 baris untuk guru piket */
-    text-align: center;
-  }
+      .header-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto auto;
+        /* Tambahkan 1 baris untuk guru piket */
+        text-align: center;
+      }
 
-  .header-grid img {
-    grid-column: 1 / span 2;
-    margin: auto;
-  }
+      .header-grid img {
+        grid-column: 1 / span 2;
+        margin: auto;
+      }
 
-  .kop {
-    grid-column: 1 / span 2;
-  }
+      .kop {
+        grid-column: 1 / span 2;
+      }
 
-  .judul-jam {
-    grid-column: 1;
-  }
+      .judul-jam {
+        grid-column: 1;
+      }
 
-  .header-kbm {
-    grid-column: 2;
-  }
+      .header-kbm {
+        grid-column: 2;
+      }
 
-  .header-piket {
-    grid-column: 1 / span 2; /* Guru piket mengambil 2 kolom penuh pada mobile */
-  }
-}
+      .header-piket {
+        grid-column: 1 / span 2;
+        /* Guru piket mengambil 2 kolom penuh pada mobile */
+      }
+    }
 
     @media (min-width: 600px) and (max-width: 1199px) {
-  .header-grid {
-    grid-template-columns: 80px auto 1fr 1fr 1fr 30px;
-    gap: 15px;
-  }
-}
-    
+      .header-grid {
+        grid-template-columns: 80px auto 1fr 1fr 1fr 30px;
+        gap: 15px;
+      }
+    }
+
     .header-grid img {
       width: 80px;
       height: 80px;
@@ -118,14 +129,14 @@
       line-height: 1.6;
       font-weight: bold;
 
-      
+
     }
 
     .kop b {
       font-family: 'Rubik', sans-serif;
       color: #FFD700;
       font-size: 1.4rem;
-      
+
     }
 
     .judul-jam {
@@ -158,8 +169,8 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      
-      
+
+
     }
 
     .header-kbm .shift {
@@ -236,11 +247,11 @@
       .header-piket {
         min-width: 140px;
       }
-      
+
       .header-piket .piket-title {
         font-size: 0.9rem;
       }
-      
+
       #guruPiket {
         font-size: 0.8rem;
         padding: 6px;
@@ -256,11 +267,12 @@
 
     .header-hr {
       border: none;
-      border-top: 1px solid #ccc; /* hanya garis atas, tipis */
-  margin: 5px 15px;
-  box-sizing: border-box;
+      border-top: 1px solid #ccc;
+      /* hanya garis atas, tipis */
+      margin: 5px 15px;
+      box-sizing: border-box;
 
-}
+    }
 
     .grid {
       display: grid;
@@ -269,30 +281,38 @@
       padding: 20px;
       box-sizing: border-box;
       justify-content: center;
-      
+
     }
 
     @media (min-width: 1200px) {
-      .grid { grid-template-columns: repeat(3, 1fr); }
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
 
     @media (max-width: 1199px) {
-      .grid { grid-template-columns: repeat(2, 1fr); }
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 599px) {
-      .grid { grid-template-columns: repeat(1, 1fr); }
+      .grid {
+        grid-template-columns: repeat(1, 1fr);
+      }
     }
 
     @media (min-width: 600px) and (max-width: 899px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-}
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
 
 
     .card {
       display: flex;
       align-items: center;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid #ccc;
       border-radius: 16px;
       padding: 10px 12px;
@@ -303,27 +323,27 @@
     }
 
     .card:hover {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     }
 
     .card:hover .kelas-box {
       background-color: #34495e;
       border: 2px solid #FFD700;
       transform: rotate(5deg);
-      box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
     }
 
     .card:hover .mapel {
       color: #FFD700;
-      text-shadow: 0 2px 10px rgba(255,215,0,0.3);
+      text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
     }
 
     .card:hover .guru {
       color: #00ffff;
-      text-shadow: 0 2px 8px rgba(0,255,255,0.3);
+      text-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
     }
 
     .kelas-box {
@@ -377,43 +397,593 @@
     }
 
     #controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin-top: 10px;
-  position: fixed;
-  bottom: 20px; /* Jarak tombol dari bawah layar */
-  left: 50%;
-  transform: translateX(-50%); /* Center tombol secara horizontal */
-  z-index: 10; /* Agar tombol muncul di atas konten lainnya */
-  background-color: rgba(0, 0, 0, 0.5); /* Background transparan agar tombol lebih jelas */
-  padding: 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  width: 90%; /* Perbesar lebar wadah agar tombol bisa terletak dengan baik */
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: flex-end;
+      gap: 10px;
+    }
 
-}
+    /* Tombol utama floating */
+    #controls::before {
+      content: '⚙️';
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
 
-button {
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  background-color: #444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+    #controls:hover::before {
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 6px 30px rgba(102, 126, 234, 0.7);
+    }
 
-button:hover {
-  background-color: #666;
-}
+    /* Sembunyikan tombol secara default */
+    #controls button,
+    #controls select {
+      opacity: 0;
+      transform: translateY(20px) scale(0.8);
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    /* Tampilkan tombol saat hover */
+    #controls:hover button,
+    #controls:hover select {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: all;
+    }
+
+    /* Delay animasi untuk efek cascade */
+    #controls:hover button:nth-child(1),
+    #controls:hover select:nth-child(1) {
+      transition-delay: 0.05s;
+    }
+
+    #controls:hover button:nth-child(2),
+    #controls:hover select:nth-child(2) {
+      transition-delay: 0.1s;
+    }
+
+    #controls:hover button:nth-child(3),
+    #controls:hover select:nth-child(3) {
+      transition-delay: 0.15s;
+    }
+
+    #controls:hover button:nth-child(4),
+    #controls:hover select:nth-child(4) {
+      transition-delay: 0.2s;
+    }
+
+    #controls:hover button:nth-child(5),
+    #controls:hover select:nth-child(5) {
+      transition-delay: 0.25s;
+    }
+
+    #controls:hover button:nth-child(6),
+    #controls:hover select:nth-child(6) {
+      transition-delay: 0.3s;
+    }
+
+    #controls:hover button:nth-child(7),
+    #controls:hover select:nth-child(7) {
+      transition-delay: 0.35s;
+    }
+
+    #controls:hover button:nth-child(8),
+    #controls:hover select:nth-child(8) {
+      transition-delay: 0.4s;
+    }
+
+    #controls:hover button:nth-child(9),
+    #controls:hover select:nth-child(9) {
+      transition-delay: 0.45s;
+    }
+
+    #controls:hover button:nth-child(10),
+    #controls:hover select:nth-child(10) {
+      transition-delay: 0.5s;
+    }
+
+    #controls:hover button:nth-child(11),
+    #controls:hover select:nth-child(11) {
+      transition-delay: 0.55s;
+    }
+
+    #controls:hover button:nth-child(12),
+    #controls:hover select:nth-child(12) {
+      transition-delay: 0.6s;
+    }
+
+    #controls:hover button:nth-child(13),
+    #controls:hover select:nth-child(13) {
+      transition-delay: 0.65s;
+    }
+
+    #controls:hover button:nth-child(14),
+    #controls:hover select:nth-child(14) {
+      transition-delay: 0.7s;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: rgba(102, 126, 234, 0.9);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateX(-5px) scale(1.05);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+    }
+
+    select {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    select:hover {
+      background: rgba(102, 126, 234, 0.9);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateX(-5px) scale(1.05);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+    }
+
+    /* Responsive untuk mobile */
+    @media (max-width: 768px) {
+      #controls::before {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        bottom: 20px;
+        right: 20px;
+      }
+
+      #controls {
+        bottom: 20px;
+        right: 20px;
+      }
+
+      button,
+      select {
+        font-size: 0.75rem;
+        padding: 8px 12px;
+      }
+    }
 
 
+    /* ===== TEMA LAYOUT STYLES ===== */
+    /* Tema 1: Klasik (Default) - sudah ada di atas */
 
+    /* Tema 2: Modern Minimalis */
+    body.layout-modern .header-grid {
+      background: rgba(0, 0, 0, 0.3);
+      border: none;
+      border-left: 5px solid #00ffff;
+      border-radius: 0;
+      box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
+    }
 
+    body.layout-modern .card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 215, 0, 0.1));
+      border: none;
+      border-left: 4px solid #00ffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    body.layout-modern .kelas-box {
+      background: linear-gradient(135deg, #00ffff, #0099cc);
+      border: none;
+      border-radius: 50%;
+      color: #000;
+      font-weight: 900;
+    }
+
+    body.layout-modern .mapel {
+      color: #FFD700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    /* Tema 3: Elegant Cards */
+    body.layout-elegant .card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    body.layout-elegant .card:hover {
+      border-color: rgba(255, 215, 0, 0.8);
+      box-shadow: 0 12px 40px rgba(255, 215, 0, 0.3);
+    }
+
+    body.layout-elegant .kelas-box {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      border: 3px solid #FFD700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    }
+
+    body.layout-elegant .header-grid {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    body.layout-elegant .mapel {
+      background: linear-gradient(90deg, #00ffff, #00cccc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Tema 5: Bold & Vibrant */
+    body.layout-vibrant .card {
+      background: linear-gradient(135deg, rgba(255, 0, 150, 0.2), rgba(0, 204, 255, 0.2));
+      border: 3px solid;
+      border-image: linear-gradient(45deg, #FF0096, #00CCFF) 1;
+      border-radius: 0;
+      transform: skew(-2deg);
+      transition: all 0.3s ease;
+    }
+
+    body.layout-vibrant .card:hover {
+      transform: skew(0deg) scale(1.05);
+      box-shadow: 0 10px 40px rgba(255, 0, 150, 0.4);
+    }
+
+    body.layout-vibrant .kelas-box {
+      background: linear-gradient(135deg, #FF0096, #FF4500);
+      border: none;
+      border-radius: 0;
+      transform: rotate(-5deg);
+      box-shadow: 0 0 30px rgba(255, 0, 150, 0.6);
+    }
+
+    body.layout-vibrant .card:hover .kelas-box {
+      transform: rotate(5deg) scale(1.1);
+    }
+
+    body.layout-vibrant .mapel {
+      color: #00CCFF;
+      text-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+      font-weight: 900;
+    }
+
+    body.layout-vibrant .guru {
+      color: #FF0096;
+      text-shadow: 0 0 10px rgba(255, 0, 150, 0.6);
+    }
+
+    body.layout-vibrant .header-grid {
+      background: linear-gradient(135deg, rgba(255, 0, 150, 0.2), rgba(0, 204, 255, 0.2));
+      border: 3px solid;
+      border-image: linear-gradient(45deg, #FF0096, #00CCFF) 1;
+      border-radius: 0;
+    }
+
+    /* Tema 6: Neon Glow - Futuristic */
+    body.layout-neon {
+      background: #0a0a0a !important;
+    }
+
+    body.layout-neon .header-grid {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 20px rgba(0, 255, 0, 0.1);
+      animation: neonPulse 2s ease-in-out infinite alternate;
+    }
+
+    body.layout-neon .card {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.6), inset 0 0 15px rgba(0, 255, 255, 0.1);
+      animation: cardGlow 3s ease-in-out infinite alternate;
+    }
+
+    body.layout-neon .kelas-box {
+      background: #000;
+      border: 3px solid #ff00ff;
+      box-shadow: 0 0 30px rgba(255, 0, 255, 0.8), inset 0 0 20px rgba(255, 0, 255, 0.3);
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    }
+
+    body.layout-neon .mapel {
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+    }
+
+    body.layout-neon .guru {
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+    }
+
+    @keyframes neonPulse {
+      from {
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 20px rgba(0, 255, 0, 0.1);
+      }
+
+      to {
+        box-shadow: 0 0 40px rgba(0, 255, 0, 0.8), inset 0 0 30px rgba(0, 255, 0, 0.2);
+      }
+    }
+
+    @keyframes cardGlow {
+      from {
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.6), inset 0 0 15px rgba(0, 255, 255, 0.1);
+      }
+
+      to {
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.9), inset 0 0 25px rgba(0, 255, 255, 0.2);
+      }
+    }
+
+    /* Tema 7: Retro Wave - 80s Synthwave */
+    body.layout-retro {
+      background: linear-gradient(180deg, #2b1055 0%, #7597de 100%) !important;
+    }
+
+    body.layout-retro .header-grid {
+      background: linear-gradient(135deg, rgba(255, 0, 128, 0.3), rgba(128, 0, 255, 0.3));
+      border: 3px solid #ff0080;
+      box-shadow: 0 8px 32px rgba(255, 0, 128, 0.4);
+      position: relative;
+    }
+
+    body.layout-retro .header-grid::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0);
+      border-radius: 16px;
+      z-index: -1;
+      filter: blur(10px);
+      opacity: 0.7;
+    }
+
+    body.layout-retro .card {
+      background: linear-gradient(135deg, rgba(255, 0, 128, 0.2), rgba(0, 212, 255, 0.2));
+      border: 2px solid #ff0080;
+      box-shadow: 0 0 20px rgba(255, 0, 128, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body.layout-retro .card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: rotate(45deg);
+      animation: retroShine 3s linear infinite;
+    }
+
+    @keyframes retroShine {
+      0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+      }
+
+      100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+      }
+    }
+
+    body.layout-retro .kelas-box {
+      background: linear-gradient(135deg, #ff0080, #ff8c00);
+      border: 3px solid #40e0d0;
+      box-shadow: 0 0 30px rgba(64, 224, 208, 0.8);
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body.layout-retro .mapel {
+      color: #ff0080;
+      text-shadow: 0 0 10px #ff0080, 0 2px 0 #000;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body.layout-retro .guru {
+      color: #40e0d0;
+      text-shadow: 0 0 10px #40e0d0;
+    }
+
+    /* Tema 8: Nature - Fresh Green */
+    body.layout-nature {
+      background: linear-gradient(135deg, #134e5e 0%, #71b280 100%) !important;
+    }
+
+    body.layout-nature .header-grid {
+      background: linear-gradient(135deg, rgba(34, 139, 34, 0.3), rgba(144, 238, 144, 0.3));
+      border: 2px solid #228b22;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(34, 139, 34, 0.3);
+    }
+
+    body.layout-nature .card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+      border: 2px solid rgba(144, 238, 144, 0.5);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    body.layout-nature .card:hover {
+      border-color: #90ee90;
+      box-shadow: 0 12px 40px rgba(144, 238, 144, 0.4);
+      transform: translateY(-8px) scale(1.02);
+    }
+
+    body.layout-nature .kelas-box {
+      background: linear-gradient(135deg, #228b22, #32cd32);
+      border: 3px solid #90ee90;
+      box-shadow: 0 0 20px rgba(144, 238, 144, 0.5);
+      color: #fff;
+    }
+
+    body.layout-nature .mapel {
+      color: #f0e68c;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    body.layout-nature .guru {
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Tema 9: Matrix - Digital Rain */
+    body.layout-matrix {
+      background: #000 !important;
+      position: relative;
+    }
+
+    body.layout-matrix::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    body.layout-matrix .header-grid {
+      background: rgba(0, 20, 0, 0.9);
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      position: relative;
+      z-index: 2;
+    }
+
+    body.layout-matrix .card {
+      background: rgba(0, 20, 0, 0.8);
+      border: 1px solid #00ff00;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+      position: relative;
+      z-index: 2;
+    }
+
+    body.layout-matrix .card:hover {
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+      border-color: #00ff00;
+    }
+
+    body.layout-matrix .kelas-box {
+      background: #000;
+      border: 2px solid #00ff00;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 255, 0, 0.2);
+    }
+
+    body.layout-matrix .mapel {
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 0 10px #00ff00;
+    }
+
+    body.layout-matrix .guru {
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 0 8px #00ff41;
+    }
+
+    body.layout-matrix #gridContainer {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Tema 10: Glassmorphism - Ultra Modern */
+    body.layout-glass {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    body.layout-glass .header-grid {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    body.layout-glass .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px) saturate(180%);
+      -webkit-backdrop-filter: blur(15px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    body.layout-glass .card:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      transform: translateY(-8px);
+    }
+
+    body.layout-glass .kelas-box {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    body.layout-glass .mapel {
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    body.layout-glass .guru {
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
   </style>
 </head>
+
 <body>
   <div class="header-grid">
     <img src="https://tv-monitoring-kbm.netlify.app/logo.png" alt="Logo MTs. An-Nur Bululawang">
@@ -446,27 +1016,30 @@ button:hover {
 
   <div id="gridContainer" class="grid"></div>
 
-<!-- Tambahkan dropdown setelah tombol berhenti di bagian controls -->
-<div id="controls">
-  <button onclick="nextTheme()">🎨 Tema</button>
-  <button onclick="toggleFont()">🔠 Font</button>
-  <button onclick="adjustFont(0.05)">A+</button>
-  <button onclick="adjustFont(-0.05)">A-</button>
-  <button onclick="adjustTime(-1)">🕘 -1 Jam</button>
-  <button onclick="adjustTime(1)">🕒 +1 Jam</button>
-  <button onclick="adjustMinute(-1)">🕐 -1 Menit</button>
-  <button onclick="adjustMinute(1)">🕐 +1 Menit</button>
-  <button onclick="adjustDay(-1)">📆 -1 Hari</button>
-  <button onclick="adjustDay(1)">📅 +1 Hari</button>
-  <button onclick="announceNow()">🔊 Umumkan</button>
-  <button onclick="stopAnnouncement()">🛑 Berhenti</button>
-  
-  <!-- Tambahkan dropdown untuk memilih suara -->
-  <select id="voiceSelect" onchange="changeVoice()" style="padding: 6px; background-color: #444; color: white; border: none; border-radius: 4px;">
-    <option value="">🗣️ Pilih Suara</option>
-  </select>
-</div>
+  <!-- Tambahkan dropdown setelah tombol berhenti di bagian controls -->
+  <div id="controls">
+    <button onclick="nextTheme()">🎨 Warna</button>
+    <button onclick="switchLayout()">🎭 Tema</button>
+    <button onclick="toggleFont()">🔠 Font</button>
+    <button onclick="adjustFont(0.05)">A+</button>
+    <button onclick="adjustFont(-0.05)">A-</button>
+    <button onclick="adjustTime(-1)">🕘 -1 Jam</button>
+    <button onclick="adjustTime(1)">🕒 +1 Jam</button>
+    <button onclick="adjustMinute(-1)">🕐 -1 Menit</button>
+    <button onclick="adjustMinute(1)">🕐 +1 Menit</button>
+    <button onclick="adjustDay(-1)">📆 -1 Hari</button>
+    <button onclick="adjustDay(1)">📅 +1 Hari</button>
+    <button onclick="announceNow()">🔊 Umumkan</button>
+    <button onclick="stopAnnouncement()">🛑 Berhenti</button>
+
+    <!-- Tambahkan dropdown untuk memilih suara -->
+    <select id="voiceSelect" onchange="changeVoice()"
+      style="padding: 6px; background-color: #444; color: white; border: none; border-radius: 4px;">
+      <option value="">🗣️ Pilih Suara</option>
+    </select>
+  </div>
 
   <script src="script.js"></script>
 </body>
+
 </html>
