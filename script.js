@@ -48,8 +48,8 @@ function nextTheme() {
 }
 
 // Daftar layout tema
-const layouts = ['', 'layout-modern', 'layout-elegant', 'layout-vibrant', 'layout-neon', 'layout-retro', 'layout-nature', 'layout-matrix', 'layout-glass'];
-const layoutNames = ['Klasik', 'Modern', 'Elegant', 'Vibrant', 'Neon Glow', 'Retro Wave', 'Nature', 'Matrix', 'Glassmorphism'];
+const layouts = ['', 'layout-modern', 'layout-sunset', 'layout-vibrant', 'layout-neon', 'layout-retro', 'layout-nature', 'layout-matrix', 'layout-glass'];
+const layoutNames = ['Klasik', 'Modern', 'Sunset', 'Vibrant', 'Neon Glow', 'Retro Wave', 'Nature', 'Matrix', 'Glassmorphism'];
 let currentLayout = 0;
 
 // Fungsi untuk mengubah layout tema
