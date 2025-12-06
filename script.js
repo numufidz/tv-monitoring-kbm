@@ -47,25 +47,50 @@ function nextTheme() {
   currentTheme = (currentTheme + 1) % themes.length;
 }
 
+// Daftar layout tema
+const layouts = ['', 'layout-modern', 'layout-elegant', 'layout-vibrant', 'layout-neon', 'layout-retro', 'layout-nature', 'layout-matrix', 'layout-glass'];
+const layoutNames = ['Klasik', 'Modern', 'Elegant', 'Vibrant', 'Neon Glow', 'Retro Wave', 'Nature', 'Matrix', 'Glassmorphism'];
+let currentLayout = 0;
+
+// Fungsi untuk mengubah layout tema
+function switchLayout() {
+  // Hapus semua class layout sebelumnya
+  layouts.forEach(layout => {
+    if (layout) document.body.classList.remove(layout);
+  });
+
+  // Pindah ke layout berikutnya
+  currentLayout = (currentLayout + 1) % layouts.length;
+
+  // Tambahkan class layout baru (jika bukan klasik/default)
+  if (layouts[currentLayout]) {
+    document.body.classList.add(layouts[currentLayout]);
+  }
+
+  // Tampilkan notifikasi tema yang dipilih (opsional)
+  console.log(`Tema diubah ke: ${layoutNames[currentLayout]}`);
+}
+
+
 // Update jam dan tanggal
 function updateClock() {
   const now = new Date();
-  
+
   // Terapkan offset waktu (jam dan menit)
   now.setHours(now.getHours() + timeOffset);
   now.setMinutes(now.getMinutes() + timeOffsetMinutes);
   now.setDate(now.getDate() + dayOffset);
-  
+
   clock.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
-  
+
   // Ambil tanggal dengan format lengkap
   let dateString = now.toLocaleDateString('id-ID', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
-  
+
   // Ganti "Minggu" dengan "Ahad" untuk tampilan
   dateString = dateString.replace(/^Minggu,/, 'Ahad,');
-  
+
   dayDate.textContent = dateString;
 }
 setInterval(updateClock, 1000);
@@ -77,12 +102,12 @@ function sortClasses(jadwal) {
     // Ekstrak angka kelas (misal dari "7A" ambil "7")
     const kelasA = parseInt(a.Kelas.match(/\d+/)[0]);
     const kelasB = parseInt(b.Kelas.match(/\d+/)[0]);
-    
+
     // Jika kelas berbeda, urutkan berdasarkan angka kelas
     if (kelasA !== kelasB) {
       return kelasA - kelasB;
     }
-    
+
     // Jika kelas sama, urutkan berdasarkan huruf/kode setelah angka
     const subKelasA = a.Kelas.replace(/\d+/, '');
     const subKelasB = b.Kelas.replace(/\d+/, '');
@@ -100,36 +125,36 @@ async function updateGuruPiket(hari, jam, isInKBMPeriod = false) {
     }
 
     const dataPiket = await fetch(endpointPiket).then(r => r.json());
-    
+
     // Tentukan shift berdasarkan jam
     const shift = jam < 12 ? 'PAGI' : 'SIANG';
     const shiftColumn = shift === 'PAGI' ? 'PIKET SHIFT PAGI' : 'PIKET SHIFT SIANG';
-    
+
     // Cari data piket untuk hari ini
     const piketHariIni = dataPiket.filter(p => p.HARI && p.HARI.toUpperCase() === hari);
-    
+
     if (piketHariIni.length === 0) {
       guruPiket.textContent = 'Tidak ada data piket';
       return;
     }
-    
+
     // Ambil semua guru piket untuk shift yang sesuai
     const daftarPiket = piketHariIni
       .filter(p => p[shiftColumn] && p[shiftColumn].trim() !== '')
       .map(p => p[shiftColumn].trim());
-    
+
     if (daftarPiket.length === 0) {
       guruPiket.textContent = 'Tidak ada piket';
       return;
     }
-    
+
     // Tampilkan daftar guru piket
     if (daftarPiket.length === 1) {
       guruPiket.textContent = daftarPiket[0];
     } else {
       guruPiket.innerHTML = daftarPiket.join('<br>');
     }
-    
+
   } catch (err) {
     console.error("Gagal memuat data piket:", err);
     guruPiket.textContent = 'Error loading piket data';
@@ -139,23 +164,23 @@ async function updateGuruPiket(hari, jam, isInKBMPeriod = false) {
 // Fungsi utama untuk mengambil dan menampilkan data jadwal - DIPERBAIKI
 async function fetchData(forceAnnounce = false) {
   const now = new Date();
-  
+
   // Terapkan offset waktu (jam dan menit) - sama seperti di updateClock
   now.setHours(now.getHours() + timeOffset);
   now.setMinutes(now.getMinutes() + timeOffsetMinutes);
   now.setDate(now.getDate() + dayOffset);
-  
+
   const jam = now.getHours();
   const menit = now.getMinutes();
-  
+
   // Ambil nama hari dalam bahasa Indonesia
   let hari = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
-  
+
   // Konversi MINGGU menjadi AHAD untuk menyesuaikan dengan spreadsheet
   if (hari === 'MINGGU') {
     hari = 'AHAD';
   }
-  
+
   const shift = jam < 12 ? 'PUTRA' : 'PUTRI';
   const timeNow = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}`;
 
@@ -186,6 +211,13 @@ async function fetchData(forceAnnounce = false) {
       periodeJam.textContent = '-';
       gridContainer.className = "grid center-message";
       gridContainer.innerHTML = `<div>Tidak ada KBM saat ini</div>`;
+
+      // Umumkan jika belum pernah diumumkan atau diminta
+      if (lastAnnouncedJamKe !== 'NO_KBM' || forceAnnounce) {
+        lastAnnouncedJamKe = 'NO_KBM';
+        announceNoKBM();
+      }
+
       return;
     }
 
@@ -194,6 +226,13 @@ async function fetchData(forceAnnounce = false) {
       periodeJam.textContent = `${periode['Jam Mulai']} - ${periode['Jam Selesai']}`;
       gridContainer.className = "grid center-message";
       gridContainer.innerHTML = `<div>Sedang istirahat</div>`;
+
+      // Umumkan jika belum pernah diumumkan atau diminta
+      if (lastAnnouncedJamKe !== 'IST' || forceAnnounce) {
+        lastAnnouncedJamKe = 'IST';
+        announceBreak(periode['Jam Mulai'], periode['Jam Selesai']);
+      }
+
       return;
     }
 
@@ -302,6 +341,88 @@ function announceSchedule(jadwal, jamKe, shift, isKamis = false) {
   }, 1200); // jeda setelah intro audio
 }
 
+// Fungsi untuk mengumumkan tidak ada KBM
+function announceNoKBM() {
+  stopAnnouncement(); // Hentikan pengumuman sebelumnya
+  introAudio.play();
+
+  setTimeout(() => {
+    const suara = [
+      "Saat ini tidak ada kegiatan belajar mengajar.",
+      "Silakan menunggu hingga jadwal KBM berikutnya dimulai.",
+      "Terima kasih atas perhatiannya."
+    ];
+
+    let index = 0;
+
+    function speakNext() {
+      if (index >= suara.length) return;
+
+      const kalimat = suara[index];
+      const utterance = new SpeechSynthesisUtterance(kalimat);
+      utterance.lang = "id-ID";
+      utterance.rate = 1.15;
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      utterance.onend = () => {
+        setTimeout(() => {
+          index++;
+          speakNext();
+        }, 500);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    speakNext();
+  }, 1200);
+}
+
+// Fungsi untuk mengumumkan waktu istirahat
+function announceBreak(jamMulai, jamSelesai) {
+  stopAnnouncement(); // Hentikan pengumuman sebelumnya
+  introAudio.play();
+
+  setTimeout(() => {
+    const suara = [
+      "Saat ini adalah waktu istirahat.",
+      `Waktu istirahat dari pukul ${jamMulai} hingga ${jamSelesai}.`,
+      "Silakan gunakan waktu istirahat dengan baik.",
+      "Terima kasih atas perhatiannya."
+    ];
+
+    let index = 0;
+
+    function speakNext() {
+      if (index >= suara.length) return;
+
+      const kalimat = suara[index];
+      const utterance = new SpeechSynthesisUtterance(kalimat);
+      utterance.lang = "id-ID";
+      utterance.rate = 1.15;
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      utterance.onend = () => {
+        setTimeout(() => {
+          index++;
+          speakNext();
+        }, 500);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    speakNext();
+  }, 1200);
+}
+
+
 // Fungsi untuk umumkan jadwal sekarang
 function announceNow() {
   fetchData(true);
@@ -365,44 +486,44 @@ function adjustDay(offset) {
 // Fungsi untuk memuat daftar suara dan mengisi dropdown
 function loadVoices() {
   const voices = window.speechSynthesis.getVoices();
-  
+
   // Debug: log total suara yang tersedia
   console.log(`Total suara tersedia: ${voices.length}`);
-  
+
   // Kosongkan dropdown kecuali opsi default
   while (voiceSelect.options.length > 1) {
     voiceSelect.remove(1);
   }
-  
+
   // Filter untuk suara bahasa Indonesia (jika ada)
   const indonesianVoices = voices.filter(voice => voice.lang === 'id-ID' || voice.lang.startsWith('id'));
-  
+
   console.log(`Jumlah suara Indonesia: ${indonesianVoices.length}`);
-  
+
   // Jika tidak ada suara Indonesia, gunakan semua suara yang tersedia
   const voicesToShow = indonesianVoices.length > 0 ? indonesianVoices : voices;
-  
+
   // Kelompokkan suara berdasarkan gender (jika informasi tersedia)
   const maleVoices = [];
   const femaleVoices = [];
   const otherVoices = [];
-  
+
   voicesToShow.forEach(voice => {
     // Debug: log info masing-masing suara
     console.log(`Suara: ${voice.name}, Bahasa: ${voice.lang}, Default: ${voice.default}`);
-    
+
     // Deteksi gender berdasarkan nama (tidak sempurna tapi cukup untuk kebanyakan kasus)
     const voiceName = voice.name.toLowerCase();
-    
+
     // Kata kunci untuk mendeteksi suara wanita
     const femaleKeywords = ['female', 'woman', 'girl', 'wanita', 'perempuan'];
-    
+
     // Kata kunci untuk mendeteksi suara pria
     const maleKeywords = ['male', 'man', 'boy', 'pria', 'laki'];
-    
+
     let isFemale = femaleKeywords.some(keyword => voiceName.includes(keyword));
     let isMale = maleKeywords.some(keyword => voiceName.includes(keyword));
-    
+
     // Pengelompokan berdasarkan kata kunci
     if (isFemale) {
       femaleVoices.push(voice);
@@ -412,12 +533,12 @@ function loadVoices() {
       otherVoices.push(voice);
     }
   });
-  
+
   // Tambahkan grup suara wanita dengan label
   if (femaleVoices.length > 0) {
     const optgroup = document.createElement('optgroup');
     optgroup.label = '👩 Suara Wanita';
-    
+
     femaleVoices.forEach(voice => {
       const option = document.createElement('option');
       option.value = voice.voiceURI || voice.name; // Gunakan voiceURI jika tersedia
@@ -425,15 +546,15 @@ function loadVoices() {
       option.setAttribute('data-voice-index', voices.indexOf(voice)); // Simpan indeks suara
       optgroup.appendChild(option);
     });
-    
+
     voiceSelect.appendChild(optgroup);
   }
-  
+
   // Tambahkan grup suara pria dengan label
   if (maleVoices.length > 0) {
     const optgroup = document.createElement('optgroup');
     optgroup.label = '👨 Suara Pria';
-    
+
     maleVoices.forEach(voice => {
       const option = document.createElement('option');
       option.value = voice.voiceURI || voice.name;
@@ -441,15 +562,15 @@ function loadVoices() {
       option.setAttribute('data-voice-index', voices.indexOf(voice));
       optgroup.appendChild(option);
     });
-    
+
     voiceSelect.appendChild(optgroup);
   }
-  
+
   // Tambahkan suara lainnya jika ada
   if (otherVoices.length > 0) {
     const optgroup = document.createElement('optgroup');
     optgroup.label = '🔊 Suara Lainnya';
-    
+
     otherVoices.forEach(voice => {
       const option = document.createElement('option');
       option.value = voice.voiceURI || voice.name;
@@ -457,10 +578,10 @@ function loadVoices() {
       option.setAttribute('data-voice-index', voices.indexOf(voice));
       optgroup.appendChild(option);
     });
-    
+
     voiceSelect.appendChild(optgroup);
   }
-  
+
   // Jika sebelumnya ada suara yang dipilih, coba pilih lagi
   if (selectedVoice) {
     for (let i = 0; i < voiceSelect.options.length; i++) {
@@ -476,9 +597,9 @@ function loadVoices() {
 function changeVoice() {
   const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
   if (!selectedOption || selectedOption.value === "") return;
-  
+
   const voices = window.speechSynthesis.getVoices();
-  
+
   // Coba dapatkan suara berdasarkan indeks yang disimpan
   let voice = null;
   if (selectedOption.hasAttribute('data-voice-index')) {
@@ -487,28 +608,28 @@ function changeVoice() {
       voice = voices[voiceIndex];
     }
   }
-  
+
   // Jika tidak berhasil, coba dengan cara lain
   if (!voice) {
     voice = voices.find(v => (v.voiceURI === selectedOption.value) || (v.name === selectedOption.value));
   }
-  
+
   if (voice) {
     selectedVoice = voice;
     console.log(`Suara diubah ke: ${voice.name} (${voice.lang})`);
-    
+
     // Test suara yang dipilih
     stopAnnouncement();
-    
+
     const utterance = new SpeechSynthesisUtterance("Suara telah diubah ke " + voice.name);
     utterance.lang = voice.lang || "id-ID";
     utterance.voice = voice;
-    
+
     // Log untuk debugging
     console.log("Setting utterance.voice =", voice.name);
-    
+
     window.speechSynthesis.speak(utterance);
-    
+
     // Lakukan pengumuman jadwal saat ini dengan suara baru
     setTimeout(() => {
       fetchData(true);
@@ -552,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     loadVoices();
   }, 100);
-  
+
   // Upaya kedua untuk memuat suara (untuk beberapa browser yang lambat)
   setTimeout(loadVoices, 2000);
 });
