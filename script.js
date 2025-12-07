@@ -20,6 +20,9 @@ const voiceSelect = document.getElementById("voiceSelect");
 const guruPiket = document.getElementById("guruPiket"); // Tambahkan elemen guru piket
 
 // Variabel state
+let globalBelData = null;
+let globalBelKhususData = null;
+let globalJadwalData = null; // Data jadwal pelajaran full
 let timeOffset = 0; // Default offset 0 jam (waktu real)
 let timeOffsetMinutes = 0; // Offset 0 menit (waktu real)
 let dayOffset = 0;
@@ -185,11 +188,26 @@ async function fetchData(forceAnnounce = false) {
   const timeNow = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}`;
 
   try {
+    console.log("Fetching data...");
     const [dataJadwal, dataBel, dataBelKhusus] = await Promise.all([
-      fetch(endpointDatabase).then(r => r.json()),
+      fetch(endpointDatabase).then(r => {
+        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+        return r.json();
+      }),
       fetch(endpointBel).then(r => r.json()),
-      fetch(endpointBelKhusus).then(r => r.json()) // Tambahkan fetch untuk BEL KHUSUS
+      fetch(endpointBelKhusus).then(r => r.json())
     ]);
+
+    console.log("Data fetched:", {
+      jadwal: dataJadwal?.length,
+      bel: dataBel?.length,
+      belKhusus: dataBelKhusus?.length
+    });
+
+    // Simpan ke variabel global
+    globalBelData = dataBel;
+    globalBelKhususData = dataBelKhusus;
+    globalJadwalData = dataJadwal; // Simpan data pelajaran full
 
     // Gunakan BEL KHUSUS untuk hari Kamis, PERIODE BEL untuk hari lainnya
     const isKamis = hari === 'KAMIS'; // Periksa apakah hari ini Kamis
@@ -281,8 +299,13 @@ async function fetchData(forceAnnounce = false) {
 
   } catch (err) {
     console.error("Gagal memuat:", err);
-    gridContainer.className = "grid center-message";
-    gridContainer.innerHTML = `<div>Gagal memuat data</div>`;
+
+    // Tampilkan error di UI hanya jika belum ada konten (initial load)
+    if (!gridContainer.children.length || gridContainer.textContent === 'Memuat jadwal...') {
+      gridContainer.className = "grid center-message";
+      gridContainer.innerHTML = `<div style="color: red;">Gagal memuat data.<br><small>${err.message}</small></div>`;
+    }
+
     // Jika terjadi error, set guru piket ke "Tidak ada data piket"
     guruPiket.textContent = 'Tidak ada data piket';
   }
@@ -487,9 +510,6 @@ function adjustDay(offset) {
 function loadVoices() {
   const voices = window.speechSynthesis.getVoices();
 
-  // Debug: log total suara yang tersedia
-  console.log(`Total suara tersedia: ${voices.length}`);
-
   // Kosongkan dropdown kecuali opsi default
   while (voiceSelect.options.length > 1) {
     voiceSelect.remove(1);
@@ -498,33 +518,23 @@ function loadVoices() {
   // Filter untuk suara bahasa Indonesia (jika ada)
   const indonesianVoices = voices.filter(voice => voice.lang === 'id-ID' || voice.lang.startsWith('id'));
 
-  console.log(`Jumlah suara Indonesia: ${indonesianVoices.length}`);
-
   // Jika tidak ada suara Indonesia, gunakan semua suara yang tersedia
   const voicesToShow = indonesianVoices.length > 0 ? indonesianVoices : voices;
 
-  // Kelompokkan suara berdasarkan gender (jika informasi tersedia)
+  // Kelompokkan suara berdasarkan gender
   const maleVoices = [];
   const femaleVoices = [];
   const otherVoices = [];
 
   voicesToShow.forEach(voice => {
-    // Debug: log info masing-masing suara
-    console.log(`Suara: ${voice.name}, Bahasa: ${voice.lang}, Default: ${voice.default}`);
-
-    // Deteksi gender berdasarkan nama (tidak sempurna tapi cukup untuk kebanyakan kasus)
+    // Deteksi gender berdasarkan nama
     const voiceName = voice.name.toLowerCase();
-
-    // Kata kunci untuk mendeteksi suara wanita
     const femaleKeywords = ['female', 'woman', 'girl', 'wanita', 'perempuan'];
-
-    // Kata kunci untuk mendeteksi suara pria
     const maleKeywords = ['male', 'man', 'boy', 'pria', 'laki'];
 
     let isFemale = femaleKeywords.some(keyword => voiceName.includes(keyword));
     let isMale = maleKeywords.some(keyword => voiceName.includes(keyword));
 
-    // Pengelompokan berdasarkan kata kunci
     if (isFemale) {
       femaleVoices.push(voice);
     } else if (isMale) {
@@ -534,53 +544,24 @@ function loadVoices() {
     }
   });
 
-  // Tambahkan grup suara wanita dengan label
-  if (femaleVoices.length > 0) {
+  // Helper untuk membuat optgroup
+  function createOptGroup(label, voiceList) {
+    if (voiceList.length === 0) return;
     const optgroup = document.createElement('optgroup');
-    optgroup.label = '👩 Suara Wanita';
-
-    femaleVoices.forEach(voice => {
-      const option = document.createElement('option');
-      option.value = voice.voiceURI || voice.name; // Gunakan voiceURI jika tersedia
-      option.textContent = `${voice.name} (${voice.lang})`;
-      option.setAttribute('data-voice-index', voices.indexOf(voice)); // Simpan indeks suara
-      optgroup.appendChild(option);
-    });
-
-    voiceSelect.appendChild(optgroup);
-  }
-
-  // Tambahkan grup suara pria dengan label
-  if (maleVoices.length > 0) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = '👨 Suara Pria';
-
-    maleVoices.forEach(voice => {
+    optgroup.label = label;
+    voiceList.forEach(voice => {
       const option = document.createElement('option');
       option.value = voice.voiceURI || voice.name;
       option.textContent = `${voice.name} (${voice.lang})`;
       option.setAttribute('data-voice-index', voices.indexOf(voice));
       optgroup.appendChild(option);
     });
-
     voiceSelect.appendChild(optgroup);
   }
 
-  // Tambahkan suara lainnya jika ada
-  if (otherVoices.length > 0) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = '🔊 Suara Lainnya';
-
-    otherVoices.forEach(voice => {
-      const option = document.createElement('option');
-      option.value = voice.voiceURI || voice.name;
-      option.textContent = `${voice.name} (${voice.lang})`;
-      option.setAttribute('data-voice-index', voices.indexOf(voice));
-      optgroup.appendChild(option);
-    });
-
-    voiceSelect.appendChild(optgroup);
-  }
+  createOptGroup('👩 Suara Wanita', femaleVoices);
+  createOptGroup('👨 Suara Pria', maleVoices);
+  createOptGroup('🔊 Suara Lainnya', otherVoices);
 
   // Jika sebelumnya ada suara yang dipilih, coba pilih lagi
   if (selectedVoice) {
@@ -599,9 +580,8 @@ function changeVoice() {
   if (!selectedOption || selectedOption.value === "") return;
 
   const voices = window.speechSynthesis.getVoices();
-
-  // Coba dapatkan suara berdasarkan indeks yang disimpan
   let voice = null;
+
   if (selectedOption.hasAttribute('data-voice-index')) {
     const voiceIndex = parseInt(selectedOption.getAttribute('data-voice-index'));
     if (!isNaN(voiceIndex) && voiceIndex >= 0 && voiceIndex < voices.length) {
@@ -609,46 +589,28 @@ function changeVoice() {
     }
   }
 
-  // Jika tidak berhasil, coba dengan cara lain
   if (!voice) {
     voice = voices.find(v => (v.voiceURI === selectedOption.value) || (v.name === selectedOption.value));
   }
 
   if (voice) {
     selectedVoice = voice;
-    console.log(`Suara diubah ke: ${voice.name} (${voice.lang})`);
-
-    // Test suara yang dipilih
+    console.log(`Suara diubah ke: ${voice.name}`);
     stopAnnouncement();
 
     const utterance = new SpeechSynthesisUtterance("Suara telah diubah ke " + voice.name);
     utterance.lang = voice.lang || "id-ID";
     utterance.voice = voice;
-
-    // Log untuk debugging
-    console.log("Setting utterance.voice =", voice.name);
-
     window.speechSynthesis.speak(utterance);
-
-    // Lakukan pengumuman jadwal saat ini dengan suara baru
-    setTimeout(() => {
-      fetchData(true);
-    }, 5000);
-  } else {
-    console.error("Tidak dapat menemukan suara:", selectedOption.value);
   }
 }
 
-// Tambahkan event listener untuk perubahan pada select
+// Event Listeners
 voiceSelect.addEventListener('change', changeVoice);
 
-// Event listener untuk perubahan daftar suara
 if ('onvoiceschanged' in speechSynthesis) {
-  speechSynthesis.addEventListener('voiceschanged', () => {
-    loadVoices();
-  });
+  speechSynthesis.addEventListener('voiceschanged', loadVoices);
 } else {
-  // Fallback untuk browser yang tidak mendukung event onvoiceschanged
   setTimeout(loadVoices, 1000);
 }
 
@@ -667,28 +629,191 @@ setInterval(() => {
   }
 }, 30000);
 
-// Load voices on page load (for browsers where onvoiceschanged might not fire)
+// Load voices on page load
 document.addEventListener('DOMContentLoaded', () => {
-  // Upaya pertama untuk memuat suara
-  setTimeout(() => {
-    loadVoices();
-  }, 100);
-
-  // Upaya kedua untuk memuat suara (untuk beberapa browser yang lambat)
+  setTimeout(loadVoices, 500);
   setTimeout(loadVoices, 2000);
 });
 
-// Sinkronisasi suara - berjaga-jaga jika speechSynthesis kehilangan konteksnya
+// Sinkronisasi suara
 setInterval(() => {
   if (window.speechSynthesis && selectedVoice) {
     const voices = window.speechSynthesis.getVoices();
-    // Pastikan voice yang dipilih masih ada dalam daftar
     if (!voices.includes(selectedVoice)) {
       const sameVoice = voices.find(v => v.name === selectedVoice.name);
       if (sameVoice) {
         selectedVoice = sameVoice;
-        console.log("Restored voice reference:", selectedVoice.name);
       }
     }
   }
 }, 30000);
+
+
+// ===== FITUR MODAL JADWAL =====
+
+function showSchedule() {
+  const modal = document.getElementById('scheduleModal');
+  const content = document.getElementById('scheduleContent');
+
+  if (!globalBelData || !globalBelKhususData) {
+    alert("Data jadwal belum dimuat. Tunggu sebentar...");
+    return;
+  }
+
+  // Tentukan hari aktif berdasarkan offset
+  const now = new Date();
+  now.setDate(now.getDate() + dayOffset);
+  let hari = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+  if (hari === 'MINGGU') hari = 'AHAD';
+
+  const isKamis = hari === 'KAMIS';
+  const data = isKamis ? globalBelKhususData : globalBelData;
+
+  // Filter Shift
+  const jadwalPutra = data.filter(d => d.Shift === 'PUTRA');
+  const jadwalPutri = data.filter(d => d.Shift === 'PUTRI');
+
+  // Render HTML
+  let html = `
+    <h2 style="text-align: center; margin-bottom: 5px; color: #FFD700;">JADWAL BEL HARIAN</h2>
+    <h3 style="text-align: center; margin-bottom: 20px; color: #fff;">Hari: ${hari} ${isKamis ? '(Khusus)' : ''}</h3>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+      <!-- Tabel Putra -->
+      <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid rgba(0,255,255,0.3);">
+        <h4 style="text-align: center; color: #00ffff; border-bottom: 1px solid #00ffff; padding-bottom: 10px; margin-top: 0;">SHIFT PUTRA (Pagi)</h4>
+        <table style="width: 100%; border-collapse: collapse; color: white;">
+          <tr style="background: rgba(0,255,255,0.1);">
+            <th style="padding: 8px; text-align: center;">Jam</th>
+            <th style="padding: 8px; text-align: center;">Waktu</th>
+          </tr>
+          ${jadwalPutra.map((row, i) => `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: ${row['Jam Ke-'] === 'IST' ? 'rgba(255,255,0,0.1)' : (i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.05)')}">
+              <td style="padding: 6px; text-align: center; font-weight: bold;">${row['Jam Ke-']}</td>
+              <td style="padding: 6px; text-align: center;">${row['Jam Mulai']} - ${row['Jam Selesai']}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+
+      <!-- Tabel Putri -->
+      <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,105,180,0.3);">
+        <h4 style="text-align: center; color: #ff69b4; border-bottom: 1px solid #ff69b4; padding-bottom: 10px; margin-top: 0;">SHIFT PUTRI (Siang)</h4>
+        <table style="width: 100%; border-collapse: collapse; color: white;">
+          <tr style="background: rgba(255,105,180,0.1);">
+            <th style="padding: 8px; text-align: center;">Jam</th>
+            <th style="padding: 8px; text-align: center;">Waktu</th>
+          </tr>
+          ${jadwalPutri.map((row, i) => `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: ${row['Jam Ke-'] === 'IST' ? 'rgba(255,255,0,0.1)' : (i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.05)')}">
+              <td style="padding: 6px; text-align: center; font-weight: bold;">${row['Jam Ke-']}</td>
+              <td style="padding: 6px; text-align: center;">${row['Jam Mulai']} - ${row['Jam Selesai']}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    </div>
+  `;
+
+  content.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeSchedule() {
+  document.getElementById('scheduleModal').style.display = 'none';
+}
+
+// Tutup modal jika klik di luar area konten
+window.onclick = function (event) {
+  const modal = document.getElementById('scheduleModal');
+  if (event.target == modal) {
+    closeSchedule();
+  }
+}
+
+function showFullSchedule(targetShift = 'SEMUA') {
+  const modal = document.getElementById('scheduleModal');
+  const content = document.getElementById('scheduleContent');
+
+  if (!globalJadwalData) {
+    alert("Data jadwal belum dimuat. Tunggu sebentar...");
+    return;
+  }
+
+  // Tentukan hari aktif
+  const now = new Date();
+  now.setDate(now.getDate() + dayOffset);
+  let hari = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+  if (hari === 'MINGGU') hari = 'AHAD';
+
+  // Filter data berdasarkan hari
+  const scheduleToday = globalJadwalData.filter(d => d.Hari && d.Hari.toString().trim().toUpperCase() === hari);
+
+  if (scheduleToday.length === 0) {
+    content.innerHTML = `<h3 style="text-align:center; color:white;">Tidak ada jadwal untuk hari ${hari} (Data Kosong)</h3>`;
+    modal.style.display = 'flex';
+    return;
+  }
+
+  // --- LOGIKA PIVOT TABEL ---
+  const allClasses = [...new Set(scheduleToday.map(d => d.Kelas))].sort();
+  const allJams = [...new Set(scheduleToday.map(d => parseInt(d['Jam Ke-'])))].sort((a, b) => a - b);
+  const maxJam = Math.max(...allJams);
+
+  // Pisahkan Kelas
+  const classesPagi = allClasses.filter(c => c.match(/[ABC]$/));
+  const classesSiang = allClasses.filter(c => c.match(/[DEFG]$/));
+  const sisaKelas = allClasses.filter(c => !c.match(/[ABC]$/) && !c.match(/[DEFG]$/));
+  if (sisaKelas.length > 0) classesPagi.push(...sisaKelas);
+  classesPagi.sort();
+
+  function createTableHTML(title, classes) {
+    if (classes.length === 0) return '';
+    let tableHtml = `
+      <div style="margin-bottom: 25px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="color: #FFD700; border-left: 4px solid #FFD700; padding-left: 10px; margin-top:0;">${title}</h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: white;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.1);">
+                <th style="border: 1px solid rgba(255,255,255,0.2); padding: 8px; width: 50px;">Jam</th>
+                ${classes.map(cls => `<th style="border: 1px solid rgba(255,255,255,0.2); padding: 8px; min-width: 80px;">${cls}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+    `;
+
+    for (let jam = 1; jam <= maxJam; jam++) {
+      tableHtml += `<tr>
+        <td style="border: 1px solid rgba(255,255,255,0.2); padding: 6px; text-align: center; font-weight: bold; background: rgba(255,255,255,0.05);">${jam}</td>`;
+      classes.forEach(cls => {
+        const entry = scheduleToday.find(d => parseInt(d['Jam Ke-']) === jam && d.Kelas === cls);
+        const mapel = entry ? entry['Nama Mapel'] : '-';
+        tableHtml += `<td style="border: 1px solid rgba(255,255,255,0.2); padding: 6px; text-align: center;">${mapel}</td>`;
+      });
+      tableHtml += `</tr>`;
+    }
+
+    tableHtml += `</tbody></table></div></div>`;
+    return tableHtml;
+  }
+
+  // Render
+  let titleShift = targetShift === 'SEMUA' ? 'LENGKAP' : targetShift;
+  let html = `
+    <h2 style="text-align: center; margin-bottom: 5px; color: #fff;">JADWAL PELAJARAN ${titleShift}</h2>
+    <h3 style="text-align: center; margin-bottom: 25px; color: #00ffff;">HARI: ${hari}</h3>
+  `;
+
+  if (targetShift === 'PAGI') {
+    html += createTableHTML('K B M  -  P A G I', classesPagi);
+  } else if (targetShift === 'SIANG') {
+    html += createTableHTML('K B M  -  S I A N G', classesSiang);
+  } else {
+    html += createTableHTML('K B M  -  P A G I', classesPagi);
+    html += createTableHTML('K B M  -  S I A N G', classesSiang);
+  }
+
+  content.innerHTML = html;
+  modal.style.display = 'flex';
+}
