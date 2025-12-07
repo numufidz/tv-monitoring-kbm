@@ -1106,21 +1106,17 @@
   <!-- Tambahkan dropdown setelah tombol berhenti di bagian controls -->
   <div id="controls">
     <button onclick="showFullSchedule('PAGI')">☀️ KBM Pagi</button>
-    <button onclick="showFullSchedule('SIANG')">🌙 KBM Siang</button>
+    <button onclick="showFullSchedule('SIANG')">🌤️ KBM Siang</button>
     <button onclick="showSchedule()">🔔 Waktu Bel</button>
-    <button onclick="nextTheme()">🎨 Warna</button>
     <button onclick="switchLayout()">🎭 Tema</button>
-    <button onclick="toggleFont()">🔠 Font</button>
-    <button onclick="adjustFont(0.05)">A+</button>
-    <button onclick="adjustFont(-0.05)">A-</button>
     <button onclick="adjustTime(-1)">🕘 -1 Jam</button>
     <button onclick="adjustTime(1)">🕒 +1 Jam</button>
-    <button onclick="adjustMinute(-1)">🕐 -1 Menit</button>
-    <button onclick="adjustMinute(1)">🕐 +1 Menit</button>
+    <button onclick="adjustMinute(-10)">🕐 -10 Menit</button>
+    <button onclick="adjustMinute(10)">🕐 +10 Menit</button>
     <button onclick="adjustDay(-1)">📆 -1 Hari</button>
     <button onclick="adjustDay(1)">📅 +1 Hari</button>
     <button onclick="announceNow()">🔊 Umumkan</button>
-    <button onclick="stopAnnouncement()">🛑 Berhenti</button>
+    <button onclick="stopAnnouncement()">🛑 Hentikan</button>
 
     <!-- Tambahkan dropdown untuk memilih suara -->
     <select id="voiceSelect" onchange="changeVoice()"

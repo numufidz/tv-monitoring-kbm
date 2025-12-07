@@ -53,7 +53,10 @@ function nextTheme() {
 // Daftar layout tema
 const layouts = ['', 'layout-modern', 'layout-sunset', 'layout-vibrant', 'layout-neon', 'layout-retro', 'layout-nature', 'layout-matrix', 'layout-glass'];
 const layoutNames = ['Klasik', 'Modern', 'Sunset', 'Vibrant', 'Neon Glow', 'Retro Wave', 'Nature', 'Matrix', 'Glassmorphism'];
-let currentLayout = 0;
+let currentLayout = Math.floor(Math.random() * layouts.length);
+if (layouts[currentLayout]) {
+  document.body.classList.add(layouts[currentLayout]);
+}
 
 // Fungsi untuk mengubah layout tema
 function switchLayout() {
