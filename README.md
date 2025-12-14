@@ -4,7 +4,7 @@
 
 ---
 
-> ⚠️ **IMPORTANT FOR DEVELOPERS:** Proyek ini sedang dalam proses migrasi struktur data. Jika Anda developer atau AI agent yang akan mengerjakan update, **baca [MIGRATION.md](MIGRATION.md) terlebih dahulu** untuk memahami perubahan struktur data dari DATABASE sheet ke DB_ASC + DB_GURU_MAPEL.
+> ✅ **MIGRATION v2.0 COMPLETE:** Struktur data telah dimigrasi ke DB_ASC (WIDE) + DB_GURU_MAPEL (master). Script.js otomatis transform WIDE → LONG on-the-fly. Lihat [MIGRATION.md](MIGRATION.md) untuk detail teknis.
 
 ---
 

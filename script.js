@@ -1,13 +1,17 @@
 const spreadsheetID = '1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I';
-const sheetDatabase = 'DATABASE';
-const sheetBel = 'PERIODE BEL';
-const sheetBelKhusus = 'BEL KHUSUS'; // Tambahkan sheet BEL KHUSUS
-const sheetPiket = 'PIKET'; // Tambahkan sheet PIKET
 
-const endpointDatabase = `https://opensheet.elk.sh/${spreadsheetID}/${sheetDatabase}`;
+// v2.0: DB_ASC (WIDE format) + DB_GURU_MAPEL (master guru data)
+const sheetDbAsc = 'DB_ASC';
+const sheetDbGuruMapel = 'DB_GURU_MAPEL';
+const sheetBel = 'PERIODE BEL';
+const sheetBelKhusus = 'BEL KHUSUS';
+const sheetPiket = 'PIKET';
+
+const endpointDbAsc = `https://opensheet.elk.sh/${spreadsheetID}/${sheetDbAsc}`;
+const endpointDbGuruMapel = `https://opensheet.elk.sh/${spreadsheetID}/${sheetDbGuruMapel}`;
 const endpointBel = `https://opensheet.elk.sh/${spreadsheetID}/${sheetBel}`;
-const endpointBelKhusus = `https://opensheet.elk.sh/${spreadsheetID}/${sheetBelKhusus}`; // Tambahkan endpoint BEL KHUSUS
-const endpointPiket = `https://opensheet.elk.sh/${spreadsheetID}/${sheetPiket}`; // Tambahkan endpoint PIKET
+const endpointBelKhusus = `https://opensheet.elk.sh/${spreadsheetID}/${sheetBelKhusus}`;
+const endpointPiket = `https://opensheet.elk.sh/${spreadsheetID}/${sheetPiket}`;
 
 // Elemen DOM
 const clock = document.getElementById("clock");
@@ -20,9 +24,15 @@ const voiceSelect = document.getElementById("voiceSelect");
 const guruPiket = document.getElementById("guruPiket"); // Tambahkan elemen guru piket
 
 // Variabel state
+// v2.0: New data structures
+let globalDbAscData = null;
+let globalDbGuruMapelData = null;
+let globalGuruLookupMap = null;
+
+// Legacy
 let globalBelData = null;
 let globalBelKhususData = null;
-let globalJadwalData = null; // Data jadwal pelajaran full
+let globalJadwalData = null; // Data jadwal (transformed dari DB_ASC WIDE)
 let timeOffset = 0; // Default offset 0 jam (waktu real)
 let timeOffsetMinutes = 0; // Offset 0 menit (waktu real)
 let dayOffset = 0;
@@ -167,6 +177,78 @@ async function updateGuruPiket(hari, jam, isInKBMPeriod = false) {
   }
 }
 
+// ===== v2.0 Helper Functions =====
+
+/**
+ * Build guru lookup map dari DB_GURU_MAPEL
+ * Maps KODE_DB_ASC → {nama_guru, mapel}
+ */
+function createGuruLookupMap(dbGuruMapelData) {
+  const map = new Map();
+  if (!dbGuruMapelData || !Array.isArray(dbGuruMapelData)) return map;
+  
+  dbGuruMapelData.forEach(row => {
+    const kode = row['KODE_DB_ASC'];
+    if (kode && kode.trim()) {
+      map.set(kode.trim(), {
+        nama_guru: row['NAMA GURU'] || '',
+        mapel: row['MAPEL_LONG'] || row['MAPEL_SHORT'] || ''
+      });
+    }
+  });
+  
+  return map;
+}
+
+/**
+ * Transform DB_ASC WIDE format → LONG format
+ * WIDE: {HARI: "SABTU", "Jam Ke-": "1", "7A": "BAR.23", "7B": "ASW.37", ..., "7D": "THI.40", ...}
+ * LONG: [{Hari: "SABTU", "Jam Ke-": "1", Shift: "PUTRA", Kelas: "7A", KODE_DB_ASC: "BAR.23", nama_guru: "...", mapel: "..."}, ...]
+ */
+function transformDbAscWideToLong(dbAscWideData, guruLookupMap) {
+  if (!dbAscWideData || !Array.isArray(dbAscWideData)) return [];
+  
+  const result = [];
+  
+  // Define class ranges
+  const putraClasses = ['7A', '7B', '7C', '8A', '8B', '8C', '9A', '9B', '9C'];
+  const putriClasses = ['7D', '7E', '7F', '7G', '8D', '8E', '8F', '8G', '8H', '9D', '9E', '9F', '9G', '9H'];
+  const allClasses = [...putraClasses, ...putriClasses];
+  
+  // Process each row
+  dbAscWideData.forEach((row) => {
+    const hari = row['HARI'];
+    const jamKe = row['Jam Ke-'];
+    
+    // Skip rows without HARI or Jam Ke-
+    if (!hari || !jamKe) return;
+    
+    // Process each class column
+    allClasses.forEach(kelas => {
+      const kode = row[kelas];
+      
+      // Skip empty codes
+      if (!kode || !kode.trim()) return;
+      
+      const kodeTrim = kode.trim();
+      const guruInfo = guruLookupMap.get(kodeTrim) || { nama_guru: '', mapel: '' };
+      const shift = putraClasses.includes(kelas) ? 'PUTRA' : 'PUTRI';
+      
+      result.push({
+        Hari: hari,
+        'Jam Ke-': jamKe.toString(),
+        Shift: shift,
+        Kelas: kelas,
+        KODE_DB_ASC: kodeTrim,
+        'Nama Mapel': guruInfo.mapel,
+        'Nama Lengkap Guru': guruInfo.nama_guru
+      });
+    });
+  });
+  
+  return result;
+}
+
 // Fungsi utama untuk mengambil dan menampilkan data jadwal - DIPERBAIKI
 async function fetchData(forceAnnounce = false) {
   const now = new Date();
@@ -191,9 +273,13 @@ async function fetchData(forceAnnounce = false) {
   const timeNow = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}`;
 
   try {
-    console.log("Fetching data...");
-    const [dataJadwal, dataBel, dataBelKhusus] = await Promise.all([
-      fetch(endpointDatabase).then(r => {
+    console.log("Fetching data v2.0 (DB_ASC + DB_GURU_MAPEL)...");
+    const [dataDbAsc, dataDbGuruMapel, dataBel, dataBelKhusus] = await Promise.all([
+      fetch(endpointDbAsc).then(r => {
+        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+        return r.json();
+      }),
+      fetch(endpointDbGuruMapel).then(r => {
         if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
         return r.json();
       }),
@@ -202,15 +288,22 @@ async function fetchData(forceAnnounce = false) {
     ]);
 
     console.log("Data fetched:", {
-      jadwal: dataJadwal?.length,
+      dbAsc: dataDbAsc?.length,
+      dbGuruMapel: dataDbGuruMapel?.length,
       bel: dataBel?.length,
       belKhusus: dataBelKhusus?.length
     });
 
-    // Simpan ke variabel global
+    // Simpan data mentah ke variabel global
+    globalDbAscData = dataDbAsc;
+    globalDbGuruMapelData = dataDbGuruMapel;
     globalBelData = dataBel;
     globalBelKhususData = dataBelKhusus;
-    globalJadwalData = dataJadwal; // Simpan data pelajaran full
+    
+    // Transform WIDE format → LONG format dan join dengan guru info
+    globalGuruLookupMap = createGuruLookupMap(dataDbGuruMapel);
+    const dataJadwal = transformDbAscWideToLong(dataDbAsc, globalGuruLookupMap);
+    globalJadwalData = dataJadwal; // Simpan data pelajaran yang sudah ditransform
 
     // Gunakan BEL KHUSUS untuk hari Kamis, PERIODE BEL untuk hari lainnya
     const isKamis = hari === 'KAMIS'; // Periksa apakah hari ini Kamis
