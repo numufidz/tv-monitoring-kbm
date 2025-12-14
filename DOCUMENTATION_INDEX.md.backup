@@ -37,25 +37,7 @@
 
 ---
 
-### 3. **MIGRATION.md** - Panduan Migrasi Struktur Data ✨ NEW
-**Untuk:** Developer & AI agent yang handle migration  
-**Isi:**
-- Quick context untuk agent
-- Before/after struktur data
-- Relasi data & lookup pattern
-- API endpoints baru (DB_ASC, DB_GURU_MAPEL)
-- Code changes required (10+ functions)
-- Complete migration example (800+ lines)
-- Testing & validation functions
-- Troubleshooting migration issues
-- Performance optimization tips
-- 6-phase migration checklist
-
-**Kapan dibaca:** Sebelum/saat melakukan migrasi dari DATABASE sheet ke DB_ASC + DB_GURU_MAPEL
-
----
-
-### 4. **TECHNICAL.md** - Spesifikasi Teknis Mendalam
+### 3. **TECHNICAL.md** - Spesifikasi Teknis Mendalam
 **Untuk:** Developer & engineer  
 **Isi:**
 - Arsitektur sistem (diagram)
@@ -75,15 +57,13 @@
 
 ---
 
-### 5. **API.md** - Referensi API Lengkap
+### 4. **API.md** - Referensi API Lengkap
 **Untuk:** Developer backend & integrator  
 **Isi:**
 - API overview (OpenSheet)
 - Google Sheets configuration
-- Semua API endpoints detail:
-  - DATABASE sheet (deprecated, see MIGRATION.md)
-  - DB_ASC sheet (new structure)
-  - DB_GURU_MAPEL sheet (new structure)
+- Semua 4 API endpoints detail:
+  - DATABASE sheet
   - PERIODE BEL sheet
   - BEL KHUSUS sheet
   - PIKET sheet
@@ -99,7 +79,7 @@
 
 ---
 
-### 6. **TROUBLESHOOTING.md** - Panduan Troubleshooting
+### 5. **TROUBLESHOOTING.md** - Panduan Troubleshooting
 **Untuk:** End user, administrator, support team  
 **Isi:**
 - 6 common issues dengan diagnosis flowchart:
@@ -124,7 +104,7 @@
 
 ---
 
-### 7. **DEVELOPMENT.md** - Panduan Pengembangan
+### 6. **DEVELOPMENT.md** - Panduan Pengembangan
 **Untuk:** Developer yang ingin contribute  
 **Isi:**
 - Quick start (5 menit setup)
@@ -168,17 +148,10 @@
 3. Reference: **API.md** (Integration points)
 4. Extend: **DEVELOPMENT.md** (Best practices)
 
-### Untuk **Developer Handling Migration** ✨
-1. Baca: **MIGRATION.md** (Complete migration guide)
-2. Understand: **API.md** (New endpoints DB_ASC & DB_GURU_MAPEL)
-3. Reference: **TECHNICAL.md** (Architecture implications)
-4. Test: **DEVELOPMENT.md** (Testing strategies)
-
 ### Untuk **AI Agent / Automation**
 1. Baca: **AGENT.md** (Lengkap)
 2. Reference: **TECHNICAL.md** (Implementation detail)
 3. Debug: **TROUBLESHOOTING.md** (Issue diagnosis)
-4. **For Migration:** **MIGRATION.md** (Step-by-step guide)
 
 ### Untuk **DevOps / Infrastructure**
 1. Baca: **TROUBLESHOOTING.md** (Deployment & monitoring)
@@ -206,15 +179,6 @@
 │  ├─ Architecture Overview                                   │
 │  └─ Agent Capabilities                                      │
 │                                                              │
-│  MIGRATION.md (Data Structure Migration) ✨ NEW             │
-│  ├─ Quick Context for Agent                                 │
-│  ├─ Before/After Structures                                 │
-│  ├─ New Endpoints (DB_ASC, DB_GURU_MAPEL)                  │
-│  ├─ Code Changes Required                                   │
-│  ├─ Complete Examples (800+ lines)                          │
-│  ├─ Testing & Validation                                    │
-│  └─ 6-Phase Migration Checklist                            │
-│                                                              │
 │  TECHNICAL.md (Deep Dive)                                   │
 │  ├─ System Architecture                                     │
 │  ├─ Data Structures                                         │
@@ -224,10 +188,7 @@
 │                                                              │
 │  API.md (Integration)                                       │
 │  ├─ OpenSheet Service                                       │
-│  ├─ Old: DATABASE endpoint (deprecated)                     │
-│  ├─ New: DB_ASC endpoint ✨                                 │
-│  ├─ New: DB_GURU_MAPEL endpoint ✨                          │
-│  ├─ PERIODE BEL, BEL KHUSUS, PIKET                         │
+│  ├─ 4 Sheets Endpoints                                      │
 │  ├─ Response Formats                                        │
 │  ├─ Error Handling                                          │
 │  └─ Testing with cURL                                       │
@@ -260,13 +221,6 @@
 #### "Apa saja fitur yang ada?"
 → **README.md** - Fitur Utama
 
-#### "Bagaimana cara migrasi ke struktur data baru?" ✨
-→ **MIGRATION.md** - Complete Migration Guide
-
-#### "Apa itu DB_ASC dan DB_GURU_MAPEL?" ✨
-→ **MIGRATION.md** - Before/After Structures
-→ **API.md** - New Endpoints
-
 #### "Aplikasi error, bagaimana cara fix?"
 → **TROUBLESHOOTING.md** - Cari issue yang sesuai
 
@@ -291,9 +245,6 @@
 
 #### "Apa task AI agent bisa handle?"
 → **AGENT.md** - AI Agent Capabilities
-
-#### "Bagaimana cara implement lookup pattern untuk guru?" ✨
-→ **MIGRATION.md** - Lookup Pattern & Code Examples
 
 ---
 
@@ -351,34 +302,6 @@ DEVELOPMENT.md (15 min)
   └─ Release Schedule
 ```
 
-### Path 5: Execute Data Migration ✨ NEW (4-6 hours)
-```
-MIGRATION.md (1 hour) ⭐ START HERE
-  ├─ Quick Context for Agent
-  ├─ Before/After Structures
-  ├─ Code Changes Required
-  └─ Complete Examples
-
-API.md (30 min)
-  └─ New Endpoints (DB_ASC, DB_GURU_MAPEL)
-
-TECHNICAL.md (30 min)
-  └─ Data Structures & Performance
-
-DEVELOPMENT.md (30 min)
-  └─ Testing Strategies
-
-Implementation (2-3 hours)
-  ├─ Create new functions
-  ├─ Update fetchData()
-  └─ Update render functions
-
-Testing (1 hour)
-  ├─ validateDataIntegrity()
-  ├─ Manual testing
-  └─ Performance benchmarks
-```
-
 ---
 
 ## 🔄 Documentation Update Flow
@@ -394,34 +317,27 @@ When something changes:
    - New feature → README.md
    - Process change → DEVELOPMENT.md
    - Bug fix → TROUBLESHOOTING.md
-   - Data structure change → MIGRATION.md ✨
    ↓
 3. Update AGENT.md (for next AI session)
    ↓
-4. Commit with: git commit -m "docs: Update X.md for Y change"
+4. Commit with: git commit -m "Docs: Update X.md for Y change"
 ```
 
 ---
 
 ## 📝 Documentation Maintenance Checklist
 
-### Weekly
+### Monthly
 - [ ] Review for outdated information
 - [ ] Update version numbers if needed
 - [ ] Check links still work
 - [ ] Verify code examples still valid
 
-### Monthly
-- [ ] Update Google Sheets if needed
-- [ ] Review console logs for warnings
-- [ ] Test on different devices/browsers
-- [ ] Backup Google Sheets
-
-### Quarterly
-- [ ] Performance audit
-- [ ] Security review
-- [ ] Update dependencies (if any)
-- [ ] Collect user feedback
+### After Each Release
+- [ ] Update version in all .md files
+- [ ] Add release notes section
+- [ ] Update feature list in README
+- [ ] Update architecture if changed
 
 ### When Major Bug Fixed
 - [ ] Add to TROUBLESHOOTING.md
@@ -433,12 +349,6 @@ When something changes:
 - [ ] Add documentation in TECHNICAL.md
 - [ ] Add to DEVELOPMENT.md tasks
 - [ ] Update API.md if new endpoints
-
-### When Data Structure Changes ✨
-- [ ] Update MIGRATION.md with new patterns
-- [ ] Update API.md with new endpoints
-- [ ] Update AGENT.md with structure reference
-- [ ] Update TECHNICAL.md data structures section
 
 ---
 
@@ -460,17 +370,14 @@ When something changes:
 ## 📊 Statistics
 
 ```
-Total Documentation:       8 files (7 + MIGRATION.md ✨)
-Total Words:              ~30,000+ words
-
+Total Documentation:       ~15,000 words
 README.md:                 ~3,000 words
 AGENT.md:                  ~4,000 words
-MIGRATION.md:              ~8,000 words ✨ NEW
 TECHNICAL.md:              ~4,000 words
-API.md:                    ~2,500 words (updated)
+API.md:                    ~2,500 words
 TROUBLESHOOTING.md:        ~3,500 words
 DEVELOPMENT.md:            ~3,000 words
-DOCUMENTATION_INDEX.md:    ~2,500 words (updated)
+DOCUMENTATION_INDEX.md:    This file
 
 Code:
 - index.html:              1,141 lines
@@ -499,12 +406,6 @@ Total:                     1,964 lines
 3. Keep **TROUBLESHOOTING.md** & **DEVELOPMENT.md** updated
 4. Use **API.md** for new integrations
 
-**For Migration Tasks:** ✨
-1. Read **MIGRATION.md** completely (1 hour)
-2. Review **API.md** for new endpoints (30 min)
-3. Follow migration checklist step-by-step
-4. Test thoroughly before deployment
-
 ---
 
 ## 📞 Documentation Support
@@ -529,14 +430,13 @@ Total:                     1,964 lines
 ```
 README.md              ~40 KB
 AGENT.md              ~60 KB
-MIGRATION.md          ~80 KB ✨ NEW
 TECHNICAL.md          ~70 KB
-API.md                ~55 KB (updated)
+API.md                ~50 KB
 TROUBLESHOOTING.md    ~65 KB
 DEVELOPMENT.md        ~60 KB
-This file             ~20 KB (updated)
+This file             ~15 KB
 ─────────────────────────────
-Total docs:          ~450 KB
+Total docs:          ~360 KB
 
 script.js             ~25 KB
 index.html            ~250 KB (includes CSS & HTML)
@@ -548,7 +448,7 @@ Total code:          ~275 KB
 
 ## 🎯 Next Steps
 
-1. **Choose your role** (User / Junior Dev / Senior Dev / DevOps / AI / Migration)
+1. **Choose your role** (User / Junior Dev / Senior Dev / DevOps / AI)
 2. **Follow the reading path** for your role
 3. **Start with the primary doc** for that role
 4. **Reference others** as needed during work
@@ -556,7 +456,7 @@ Total code:          ~275 KB
 
 ---
 
-**Documentation Version:** 2.0.0 ✨ (Added MIGRATION.md)  
+**Documentation Version:** 1.0.0  
 **Last Updated:** Desember 2024  
 **Maintained By:** Development Team
 
@@ -564,15 +464,14 @@ Total code:          ~275 KB
 
 ## 📋 Quick Links
 
-| Document | Purpose | Size | Status |
-|----------|---------|------|--------|
-| [README.md](README.md) | User overview | ~40 KB | Active |
-| [AGENT.md](AGENT.md) | AI development | ~60 KB | Active |
-| [MIGRATION.md](MIGRATION.md) | Data migration | ~80 KB | ✨ NEW |
-| [TECHNICAL.md](TECHNICAL.md) | Technical deep dive | ~70 KB | Active |
-| [API.md](API.md) | API reference | ~55 KB | Updated |
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Problem solving | ~65 KB | Active |
-| [DEVELOPMENT.md](DEVELOPMENT.md) | Developer guide | ~60 KB | Active |
+| Document | Purpose | Size |
+|----------|---------|------|
+| [README.md](README.md) | User overview | ~3 KB |
+| [AGENT.md](AGENT.md) | AI development | ~4 KB |
+| [TECHNICAL.md](TECHNICAL.md) | Technical deep dive | ~4 KB |
+| [API.md](API.md) | API reference | ~2.5 KB |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Problem solving | ~3.5 KB |
+| [DEVELOPMENT.md](DEVELOPMENT.md) | Developer guide | ~3 KB |
 
 ---
 

@@ -2,12 +2,6 @@
 
 **Sistem monitoring jadwal pelajaran real-time untuk MTs. An-Nur Bululawang**
 
----
-
-> ⚠️ **IMPORTANT FOR DEVELOPERS:** Proyek ini sedang dalam proses migrasi struktur data. Jika Anda developer atau AI agent yang akan mengerjakan update, **baca [MIGRATION.md](MIGRATION.md) terlebih dahulu** untuk memahami perubahan struktur data dari DATABASE sheet ke DB_ASC + DB_GURU_MAPEL.
-
----
-
 ## 📋 Daftar Isi
 
 1. [Gambaran Umum](#gambaran-umum)
@@ -19,7 +13,6 @@
 7. [Penggunaan](#penggunaan)
 8. [Struktur API](#struktur-api)
 9. [Troubleshooting](#troubleshooting)
-10. [Dokumentasi](#dokumentasi)
 
 ---
 
@@ -106,12 +99,6 @@ tv-monitoring-kbm/
 ├── manifest.json           # Web App Manifest
 ├── README.md              # Dokumentasi ini
 ├── AGENT.md               # Panduan untuk AI Agent
-├── MIGRATION.md           # ✨ Panduan migrasi struktur data
-├── TECHNICAL.md           # Spesifikasi teknis
-├── API.md                 # Referensi API
-├── TROUBLESHOOTING.md     # Panduan troubleshooting
-├── DEVELOPMENT.md         # Panduan development
-├── DOCUMENTATION_INDEX.md # Navigasi dokumentasi
 └── audio/
     ├── intro.mp3a
     ├── intro.mp3b
@@ -148,11 +135,7 @@ tv-monitoring-kbm/
 
 **Spreadsheet ID:** `1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I`
 
-> ⚠️ **NOTE:** Struktur data sedang dalam proses migrasi. Lihat [MIGRATION.md](MIGRATION.md) untuk detail lengkap.
-
-### Current Structure (v1.0 - Deprecated)
-
-#### Sheet 1: DATABASE (Legacy)
+### Sheet 1: DATABASE
 Struktur jadwal pelajaran dengan kolom:
 - **Hari:** Nama hari (SABTU, AHAD, SENIN, dst)
 - **Jam Ke-:** Nomor jam pelajaran (1-7)
@@ -161,49 +144,24 @@ Struktur jadwal pelajaran dengan kolom:
 
 **Format Kode Mapel:** `[KODE].[NOMOR]` (misal: ASW.37, ING.02)
 
-> ⚠️ Sheet ini akan deprecated. Gunakan DB_ASC + DB_GURU_MAPEL untuk struktur baru.
-
-### New Structure (v2.0 - Recommended) ✨
-
-#### Sheet 1: DB_ASC
-Jadwal pelajaran (hanya kode mapel):
-- **HARI:** Nama hari (SABTU - KAMIS, 6 hari)
-- **Jam-Ke:** Nomor jam pelajaran (1-7)
-- **7A-9C:** Kode untuk shift pagi
-- **7D-9H:** Kode untuk shift siang
-
-#### Sheet 2: DB_GURU_MAPEL
-Master data guru dan mata pelajaran:
-- **KODE_GURU:** ID guru
-- **NAMA GURU:** Nama lengkap guru
-- **KODE_DB_ASC:** Kode yang digunakan di DB_ASC (foreign key)
-- **MAPEL_LONG:** Nama lengkap mata pelajaran
-- **MAPEL_SHORT:** Nama singkat mata pelajaran
-- **NO. WA:** Nomor WhatsApp guru
-
-**Keuntungan struktur baru:**
-- ✅ Data guru tersentralisasi (update sekali, apply ke semua)
-- ✅ Konsistensi data terjaga
-- ✅ Lookup performance lebih baik (O(1) vs O(n))
-- ✅ Mudah maintenance
-
-### Unchanged Sheets
-
-#### Sheet 3: PERIODE BEL
+### Sheet 2: PERIODE BEL
 Jadwal waktu bel reguler dengan kolom:
 - **Shift:** PUTRA atau PUTRI
 - **Jam Ke-:** 1-7 atau IST (istirahat)
 - **Jam Mulai:** Waktu mulai (HH:MM)
 - **Jam Selesai:** Waktu selesai (HH:MM)
 
-#### Sheet 4: BEL KHUSUS
+### Sheet 3: BEL KHUSUS
 Jadwal khusus hari Kamis (struktur sama dengan PERIODE BEL)
 
-#### Sheet 5: PIKET
+### Sheet 4: PIKET
 Data guru piket dengan kolom:
 - **HARI:** Nama hari
 - **PIKET SHIFT PAGI:** Nama guru piket shift pagi
 - **PIKET SHIFT SIANG:** Nama guru piket shift siang
+
+### Sheet 5: [GURU_MAPEL] (Optional)
+Referensi guru dan mata pelajaran (jika diperlukan untuk lookup)
 
 ---
 
@@ -237,8 +195,6 @@ Data guru piket dengan kolom:
 1. Buka Google Sheets dengan ID di atas
 2. Pastikan sheet publik (Share > Viewer link)
 3. Update `spreadsheetID` di script.js jika menggunakan sheet berbeda
-
-> ⚠️ **Untuk Developer:** Jika Anda akan menggunakan struktur data baru (v2.0), ikuti panduan di [MIGRATION.md](MIGRATION.md) untuk setup yang benar.
 
 ---
 
@@ -275,79 +231,50 @@ Data guru piket dengan kolom:
 
 ## 🔌 Struktur API
 
-### Endpoint Data (v1.0 - Legacy)
+### Endpoint Data
 
 ```javascript
-// DATABASE (Deprecated)
+// DATABASE
 https://opensheet.elk.sh/[SPREADSHEET_ID]/DATABASE
-```
 
-### Endpoint Data (v2.0 - New) ✨
-
-```javascript
-// DB_ASC (Jadwal)
-https://opensheet.elk.sh/[SPREADSHEET_ID]/DB_ASC
-
-// DB_GURU_MAPEL (Master Guru)
-https://opensheet.elk.sh/[SPREADSHEET_ID]/DB_GURU_MAPEL
-
-// PERIODE BEL (Unchanged)
+// PERIODE BEL
 https://opensheet.elk.sh/[SPREADSHEET_ID]/PERIODE%20BEL
 
-// BEL KHUSUS (Unchanged)
+// BEL KHUSUS
 https://opensheet.elk.sh/[SPREADSHEET_ID]/BEL%20KHUSUS
 
-// PIKET (Unchanged)
+// PIKET
 https://opensheet.elk.sh/[SPREADSHEET_ID]/PIKET
 ```
 
 ### Response Format
 
-#### DB_ASC Response (New):
+Setiap endpoint mengembalikan array of objects:
+
 ```json
 [
   {
-    "HARI": "SABTU",
-    "Jam-Ke": "1",
-    "7A": "BAR.23",
-    "7B": "ASW.37",
-    "7C": "ING.35",
+    "Hari": "SABTU",
+    "Jam Ke-": "1",
+    "7A": "ASW.37",
+    "7B": "ING.02",
     ...
-  }
+  },
+  ...
 ]
 ```
 
-#### DB_GURU_MAPEL Response (New):
-```json
-[
-  {
-    "KODE_GURU": "02",
-    "NAMA GURU": "Heru Yulianto M.Pd",
-    "KODE_DB_ASC": "ING.02",
-    "MAPEL_LONG": "B. INGGRIS",
-    "MAPEL_SHORT": "B.INGG",
-    "NO. WA": "6285335842568"
-  }
-]
-```
-
-### Fetch Logic (New Structure)
+### Fetch Logic
 
 ```javascript
 // Fetch semua sheet secara parallel
-const [dbAscData, dbGuruData, belData, belKhususData, piketData] = await Promise.all([
-  fetch(endpointDbAsc).then(r => r.json()),
-  fetch(endpointDbGuru).then(r => r.json()),
+const [dbData, belData, belKhususData, piketData] = await Promise.all([
+  fetch(endpointDatabase).then(r => r.json()),
   fetch(endpointBel).then(r => r.json()),
   fetch(endpointBelKhusus).then(r => r.json()),
   fetch(endpointPiket).then(r => r.json())
 ]);
-
-// Lookup guru info
-const guruInfo = lookupGuruInfo(kodeDbAsc, dbGuruData);
 ```
-
-> 📘 **Detail lengkap:** Lihat [API.md](API.md) untuk referensi lengkap dan [MIGRATION.md](MIGRATION.md) untuk implementasi lookup pattern.
 
 ---
 
@@ -365,8 +292,6 @@ const guruInfo = lookupGuruInfo(kodeDbAsc, dbGuruData);
 2. Buka F12 > Console, lihat error message
 3. Check struktur data di Google Sheets
 4. Coba refresh atau tunggu beberapa saat
-
-> 📘 **Troubleshooting lengkap:** Lihat [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ### Pengumuman suara tidak jalan
 **Penyebab:**
@@ -397,79 +322,6 @@ const guruInfo = lookupGuruInfo(kodeDbAsc, dbGuruData);
 1. Set jam sistem dengan benar
 2. Manual adjust waktu via control panel
 
-### Error setelah migrasi struktur data ✨
-**Penyebab:**
-1. Kode belum diupdate untuk struktur baru
-2. Lookup function tidak ter-implement
-3. Field name mismatch
-
-**Solusi:**
-1. Baca [MIGRATION.md](MIGRATION.md) untuk panduan lengkap
-2. Implement lookup pattern yang dijelaskan
-3. Validasi data dengan `validateDataIntegrity()`
-
----
-
-## 📚 Dokumentasi
-
-Proyek ini memiliki dokumentasi lengkap untuk berbagai kebutuhan:
-
-### Untuk Users
-- **README.md** (file ini) - Overview & penggunaan
-- **TROUBLESHOOTING.md** - Panduan troubleshooting
-
-### Untuk Developers
-- **DEVELOPMENT.md** - Panduan development & contributing
-- **TECHNICAL.md** - Spesifikasi teknis mendalam
-- **API.md** - Referensi API lengkap
-- **MIGRATION.md** ✨ - Panduan migrasi struktur data (v1.0 → v2.0)
-
-### Untuk AI Agents
-- **AGENT.md** - Konteks lengkap untuk AI development agent
-- **MIGRATION.md** ✨ - Quick context & complete migration guide
-
-### Navigation
-- **DOCUMENTATION_INDEX.md** - Panduan navigasi semua dokumentasi
-
-> 📘 **Mulai dari mana?** Lihat [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) untuk panduan navigasi berdasarkan role Anda.
-
----
-
-## 🔄 Version History & Migration
-
-### v1.0.0 (Current - Legacy)
-- Initial release
-- Features: Jadwal, TTS, Themes, Piket
-- Data Structure: DATABASE sheet (mixed data)
-- API: OpenSheet (4 endpoints)
-
-### v2.0.0 (In Progress - Migration) ✨
-- **BREAKING CHANGE:** Data structure migration
-- New Structure: DB_ASC + DB_GURU_MAPEL (normalized)
-- Performance: Improved with Map-based lookup
-- Maintenance: Easier guru data updates
-- **Migration Guide:** [MIGRATION.md](MIGRATION.md)
-
-> ⚠️ **Important for Developers:** Jika Anda akan bekerja dengan code ini, pastikan baca [MIGRATION.md](MIGRATION.md) untuk memahami perubahan struktur data yang sedang berlangsung.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Untuk berkontribusi:
-
-1. Fork repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-**Sebelum contribute:**
-- Baca [DEVELOPMENT.md](DEVELOPMENT.md) untuk panduan development
-- Baca [MIGRATION.md](MIGRATION.md) jika bekerja dengan data structure
-- Follow code style guidelines
-- Test thoroughly sebelum submit PR
-
 ---
 
 ## 📝 Catatan Pengembang
@@ -478,29 +330,26 @@ Contributions are welcome! Untuk berkontribusi:
 ```javascript
 let globalBelData;        // Data jadwal waktu
 let globalBelKhususData;  // Data jadwal khusus Kamis
-let globalJadwalData;     // Data jadwal pelajaran lengkap (v1.0)
-// v2.0 New:
-let globalDbAscData;      // Data jadwal (kode only)
-let globalDbGuruData;     // Data guru master
-let globalGuruLookupMap;  // Performance cache for lookup
-let globalJadwalProcessed;// Joined data (ready to render)
+let globalJadwalData;     // Data jadwal pelajaran lengkap
+let timeOffset;           // Offset jam (untuk testing)
+let timeOffsetMinutes;    // Offset menit
+let dayOffset;            // Offset hari
+let currentFontSize;      // Ukuran font saat ini
+let lastAnnouncedJamKe;   // Tracking pergantian jam (anti duplikasi pengumuman)
+let selectedVoice;        // Voice object yang dipilih
 ```
 
 ### Key Functions
 
-| Function | Purpose | Version |
-|----------|---------|---------|
-| `fetchData()` | Main orchestration - fetch all data & render | v1.0 |
-| `updateClock()` | Update tampilan jam & tanggal | v1.0 |
-| `announceSchedule()` | Text-to-speech pengumuman jadwal | v1.0 |
-| `showSchedule()` | Modal jadwal bel harian | v1.0 |
-| `showFullSchedule()` | Modal jadwal pelajaran lengkap | v1.0 |
-| `adjustTime()` | Manual adjust waktu | v1.0 |
-| `loadVoices()` | Load suara TTS dari browser | v1.0 |
-| `createGuruLookupMap()` | Build O(1) lookup cache | v2.0 ✨ |
-| `lookupGuruInfo()` | Get guru info from kode | v2.0 ✨ |
-| `processJadwalWithLookup()` | Join jadwal + guru data | v2.0 ✨ |
-| `validateDataIntegrity()` | Test data consistency | v2.0 ✨ |
+| Function | Purpose |
+|----------|---------|
+| `fetchData()` | Main orchestration - fetch all data & render |
+| `updateClock()` | Update tampilan jam & tanggal |
+| `announceSchedule()` | Text-to-speech pengumuman jadwal |
+| `showSchedule()` | Modal jadwal bel harian |
+| `showFullSchedule()` | Modal jadwal pelajaran lengkap |
+| `adjustTime()` | Manual adjust waktu |
+| `loadVoices()` | Load suara TTS dari browser |
 
 ### Update Interval
 - Clock: 1 detik (setInterval 1000ms)
@@ -530,7 +379,5 @@ Untuk pertanyaan atau laporan bug, hubungi tim IT sekolah.
 
 ---
 
-**Last Updated:** Desember 2024  
-**Version:** 2.0.0 (Migration in progress)  
-**Documentation:** Complete (8 files)
-
+**Last Updated:** Desember 2024
+**Version:** 1.0.0
