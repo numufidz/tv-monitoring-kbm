@@ -110,7 +110,55 @@ QUR.11  = Quran Hadist, Teacher #11
 MTK.44  = Matematika, Teacher #44
 ```
 
-#### 2. PERIODE BEL - Regular Bell Schedule
+#### 2. KELAS_SHIFT - Class to Shift Mapping (⭐ NEW v2.0)
+```
+URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/KELAS_SHIFT
+Method: GET
+Auth:   None
+CORS:   Enabled
+```
+
+**Purpose:** Maps each class code to its shift (PUTRA/PUTRI)
+
+**Response Format:**
+```json
+[
+  {"KELAS": "7A", "SHIFT": "PUTRA"},
+  {"KELAS": "7B", "SHIFT": "PUTRA"},
+  {"KELAS": "7C", "SHIFT": "PUTRA"},
+  {"KELAS": "8A", "SHIFT": "PUTRA"},
+  {"KELAS": "8B", "SHIFT": "PUTRA"},
+  {"KELAS": "8C", "SHIFT": "PUTRA"},
+  {"KELAS": "9A", "SHIFT": "PUTRA"},
+  {"KELAS": "9B", "SHIFT": "PUTRA"},
+  {"KELAS": "9C", "SHIFT": "PUTRA"},
+  {"KELAS": "7D", "SHIFT": "PUTRI"},
+  {"KELAS": "7E", "SHIFT": "PUTRI"},
+  {"KELAS": "7F", "SHIFT": "PUTRI"},
+  {"KELAS": "7G", "SHIFT": "PUTRI"},
+  {"KELAS": "8D", "SHIFT": "PUTRI"},
+  {"KELAS": "8E", "SHIFT": "PUTRI"},
+  {"KELAS": "8F", "SHIFT": "PUTRI"},
+  {"KELAS": "8G", "SHIFT": "PUTRI"},
+  {"KELAS": "8H", "SHIFT": "PUTRI"},
+  {"KELAS": "9D", "SHIFT": "PUTRI"},
+  {"KELAS": "9E", "SHIFT": "PUTRI"},
+  {"KELAS": "9F", "SHIFT": "PUTRI"},
+  {"KELAS": "9G", "SHIFT": "PUTRI"},
+  {"KELAS": "9H", "SHIFT": "PUTRI"}
+]
+```
+
+**Column Mapping:**
+- `KELAS`: Class code (7A-9H)
+- `SHIFT`: Shift name (PUTRA or PUTRI)
+
+**Benefits:**
+- Single source of truth for class assignments
+- Change shift assignments without code redeploy
+- Support for future class reorganizations
+
+#### 3. PERIODE BEL - Regular Bell Schedule
 ```
 URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PERIODE%20BEL
 Method: GET
@@ -191,7 +239,7 @@ CORS:   Enabled
 - `Jam Mulai`: Format HH:MM (24-hour)
 - `Jam Selesai`: Format HH:MM (24-hour)
 
-#### 3. BEL KHUSUS - Thursday Special Schedule
+#### 4. BEL KHUSUS - Thursday Special Schedule
 ```
 URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/BEL%20KHUSUS
 Method: GET
@@ -205,7 +253,7 @@ CORS:   Enabled
 - Hari Kamis memiliki jadwal bel yang berbeda
 - Aplikasi otomatis switch ke sheet ini jika hari === KAMIS
 
-#### 4. PIKET - Duty Teachers
+#### 5. PIKET - Duty Teachers
 ```
 URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PIKET
 Method: GET

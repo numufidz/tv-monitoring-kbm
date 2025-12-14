@@ -8,18 +8,50 @@
 
 | Komponen | Status | Lokasi |
 |----------|--------|--------|
-| **Endpoints** | ✅ SELESAI | script.js lines 1-14 |
-| **Global Variables** | ✅ SELESAI | script.js lines 23-31 |
-| **Transformation Functions** | ✅ SELESAI | script.js lines 176-255 |
-| **fetchData() Update** | ✅ SELESAI | script.js lines 254-290 |
+| **Endpoints** | ✅ SELESAI | script.js lines 1-17 (+ KELAS_SHIFT) |
+| **Global Variables** | ✅ SELESAI | script.js lines 32-38 |
+| **Transformation Functions** | ✅ SELESAI | script.js lines 176-230 + createKelasShiftMap() |
+| **fetchData() Update** | ✅ SELESAI | script.js lines 295-320 (parallel fetch 5 sheets) |
 | **Filter & Rendering** | ✅ KOMPATIBEL | No changes needed |
+| **KELAS_SHIFT Mapping** | ✅ SELESAI | Dynamic shift lookup from sheet |
 | **Testing** | 🔄 PENDING | Test dengan Google Sheets data |
 
 ---
 
 ## 📊 Arsitektur Data v2.0
 
-### Input: Google Sheets (Tetap WIDE Format)
+### Input: Google Sheets (5 Sheets)
+
+**KELAS_SHIFT Sheet (NEW - untuk class-to-shift mapping):**
+```
+KELAS | SHIFT
+------|-------
+7A    | PUTRA
+7B    | PUTRA
+7C    | PUTRA
+8A    | PUTRA
+8B    | PUTRA
+8C    | PUTRA
+9A    | PUTRA
+9B    | PUTRA
+9C    | PUTRA
+7D    | PUTRI
+7E    | PUTRI
+7F    | PUTRI
+7G    | PUTRI
+8D    | PUTRI
+8E    | PUTRI
+8F    | PUTRI
+8G    | PUTRI
+8H    | PUTRI
+9D    | PUTRI
+9E    | PUTRI
+9F    | PUTRI
+9G    | PUTRI
+9H    | PUTRI
+```
+
+### Input: Google Sheets (WIDE Format)
 - ✅ **Maintainability** - Struktur lebih mudah dipahami dan dikelola
 
 ### Timeline Migrasi

@@ -4,7 +4,7 @@
 
 ---
 
-> ✅ **MIGRATION v2.0 COMPLETE:** Struktur data telah dimigrasi ke DB_ASC (WIDE) + DB_GURU_MAPEL (master). Script.js otomatis transform WIDE → LONG on-the-fly. Lihat [MIGRATION.md](MIGRATION.md) untuk detail teknis.
+> ✅ **MIGRATION v2.0 COMPLETE:** Struktur data telah dimigrasi ke DB_ASC (WIDE) + DB_GURU_MAPEL (master) + KELAS_SHIFT (mapping). Script.js otomatis transform WIDE → LONG on-the-fly dengan dynamic shift mapping. Lihat [MIGRATION.md](MIGRATION.md) untuk detail teknis.
 
 ---
 
