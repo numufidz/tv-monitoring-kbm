@@ -21,19 +21,20 @@
 
 ---
 
-### 2. **AGENT.md** - Panduan untuk AI Agent
+### 2. **AGENT.md** - Panduan untuk AI Agent ✅ UPDATED v2.0
 **Untuk:** AI development agent & developer advanced  
+**Status:** Updated untuk v2.0 migration  
 **Isi:**
-- Konteks historis proyek
-- Struktur data lengkap
-- API endpoints detail
-- Arsitektur kode
-- Fitur-fitur sistem
-- Known issues & solutions
-- Maintenance checklist
+- Konteks historis proyek lengkap
+- Struktur data DB_ASC, DB_GURU_MAPEL, KELAS_SHIFT (v2.0)
+- 6 API endpoints dengan 2 helper sheets
+- Lookup pattern & O(1) hash map implementation
+- Fitur-fitur sistem & v2.0 additions
+- Known issues & solutions untuk v2.0
+- Maintenance checklist v2.0-aware
 - Capabilities & limitations AI agent
 
-**Kapan dibaca:** Sebelum AI agent mengerjakan task, atau developer senior perlu konteks
+**Kapan dibaca:** Sebelum mengerjakan v2.0 tasks, atau developer senior perlu context migrasi
 
 ---
 
@@ -75,77 +76,83 @@
 
 ---
 
-### 5. **API.md** - Referensi API Lengkap
+### 5. **API.md** - Referensi API Lengkap ✅ UPDATED v2.0
 **Untuk:** Developer backend & integrator  
+**Status:** Updated untuk 6 endpoints v2.0  
 **Isi:**
-- API overview (OpenSheet)
-- Google Sheets configuration
+- OpenSheet API overview
+- Google Sheets configuration (6 sheets)
 - Semua API endpoints detail:
-  - DATABASE sheet (deprecated, see MIGRATION.md)
-  - DB_ASC sheet (new structure)
-  - DB_GURU_MAPEL sheet (new structure)
-  - PERIODE BEL sheet
-  - BEL KHUSUS sheet
-  - PIKET sheet
-- Response format examples
-- Fetch implementation
-- Data filtering logic
-- Error handling
-- Performance optimization
-- Testing dengan cURL
-- Integration checklist
+  - **NEW:** DB_ASC sheet (WIDE format jadwal - 42 rows)
+  - **NEW:** DB_GURU_MAPEL sheet (Master guru data - ~100 entries)
+  - **NEW:** KELAS_SHIFT sheet (Dynamic class mapping - 23 entries)
+  - PERIODE BEL sheet (Regular schedule)
+  - BEL KHUSUS sheet (Thursday schedule)
+  - PIKET sheet (Duty roster)
+  - **DEPRECATED:** DATABASE (replaced by DB_ASC)
+- v2.0 Response format dengan lookup keys
+- Fetch implementation dengan parallel Promise.all (6 endpoints)
+- **NEW:** Lookup pattern & O(1) hash map
+- **NEW:** Filter logic for processed jadwal
+- Error handling v2.0
+- Performance optimization (lookup caching)
+- Testing dengan cURL untuk 6 endpoints
+- Integration checklist v2.0
 
-**Kapan dibaca:** Saat integrasi dengan backend atau update Google Sheets
+**Kapan dibaca:** Saat integrasi v2.0, backend update, atau testing 6 endpoints
 
 ---
 
-### 6. **TROUBLESHOOTING.md** - Panduan Troubleshooting
-**Untuk:** End user, administrator, support team  
+### 6. **TROUBLESHOOTING.md** - Panduan Troubleshooting ✅ UPDATED v2.0
+**Untuk:** End user, administrator, support team, developer  
+**Status:** Updated dengan v2.0 diagnostics & 6-sheet troubleshooting  
 **Isi:**
-- 6 common issues dengan diagnosis flowchart:
-  1. Tidak ada jadwal ditampilkan
-  2. Network error
+- Troubleshooting guide untuk 7+ common issues:
+  1. Jadwal tidak ditampilkan (v2.0 - 6 sheets diagnosis)
+  2. Network error (testing 6 endpoints)
   3. Pengumuman suara tidak bekerja
   4. Theme/layout tidak berubah
   5. Waktu tidak akurat
-  6. Hanya 3 kelas ditampilkan
-- Step-by-step solutions
-- Testing procedures
+  6. Hanya 3 kelas ditampilkan (v2.0 filtering)
+  7. **NEW:** Missing guru information (lookup debug)
+- **NEW:** v2.0 Diagnosis flowchart (6-sheet architecture)
+- Step-by-step solutions dengan v2.0 examples
+- Testing procedures v2.0-aware
 - Performance testing guide
-- Deployment guide lengkap:
-  - Git setup
-  - GitHub push
-  - Netlify deployment
-  - Auto-deploy on push
-  - Monitoring & rollback
-- Security checklist
+- Deployment guide lengkap (Git, GitHub, Netlify)
+- Testing checklist (pre & post-deployment)
+- Security checklist v2.0
+- Support escalation
 
-**Kapan dibaca:** Saat ada problem atau mau deploy
+**Kapan dibaca:** Saat troubleshoot issue, pre-deployment testing, atau v2.0 validation
 
 ---
 
-### 7. **DEVELOPMENT.md** - Panduan Pengembangan
+### 7. **DEVELOPMENT.md** - Panduan Pengembangan ✅ UPDATED v2.0
 **Untuk:** Developer yang ingin contribute  
+**Status:** Updated dengan v2.0 code patterns & lookup examples  
 **Isi:**
-- Quick start (5 menit setup)
-- Project structure detail
+- Quick start (5 menit setup lokal)
+- Project structure v2.0-aware
 - Development workflow (8 steps)
-- Code style guide
+- Code style guide v2.0 (lookup patterns)
 - Testing guide (unit, integration, visual)
+  - **NEW:** Testing untuk lookup & guru mapping
+  - **NEW:** V2.0 data validation tests
 - Common development tasks:
-  - Add new sheet data
+  - **NEW:** Add new sheet data v2.0 (lookup example)
   - Modify theme
-  - Fix data column mismatch
+  - Fix data column mismatch (v2.0)
   - Update announcement text
-- Performance optimization tips
-- Debugging techniques
-- Code review checklist
+- **NEW:** Performance optimization dengan lookup (O(1) vs O(n))
+- Debugging techniques untuk v2.0
+- Code review checklist v2.0
 - Deployment process
 - Documentation standards
 - Contributing guidelines
 - Learning resources
 
-**Kapan dibaca:** Sebelum mulai development atau contribute
+**Kapan dibaca:** Sebelum mulai development v2.0 atau contribute code
 
 ---
 

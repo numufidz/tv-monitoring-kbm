@@ -30,41 +30,38 @@ Owner:  [School Admin Email]
 
 ### Sheets dalam Spreadsheet
 
-| Sheet Name | Purpose | Rows | Columns | Update Frequency |
-|-----------|---------|------|---------|------------------|
-| DATABASE | Master jadwal pelajaran | 50+ | 25 | Daily |
-| PERIODE BEL | Jadwal waktu regular | 14 | 4 | Semester |
-| BEL KHUSUS | Jadwal khusus Kamis | 14 | 4 | Semester |
-| PIKET | Guru piket duty roster | 10+ | 3 | Monthly |
+| DATABASE | Master jadwal pelajaran | 50+ | 25 | Daily | ❌ DEPRECATED - Use DB_ASC |
+| DB_ASC | Master jadwal (WIDE format) | 42 | 25 | Daily | ✅ NEW - Active v2.0 |
+| DB_GURU_MAPEL | Master guru data | 100+ | 6 | Daily | ✅ NEW - v2.0 lookup |
+| KELAS_SHIFT | Class-to-shift mapping | 23 | 2 | Semester | ✅ NEW - v2.0 helper |
+| PERIODE BEL | Jadwal waktu regular | 14 | 4 | Semester | ✅ Active |
+| BEL KHUSUS | Jadwal khusus Kamis | 14 | 4 | Semester | ✅ Active |
+| PIKET | Guru piket duty roster | 10+ | 3 | Monthly | ✅ Active |
 
 ---
 
 ## 📊 API Endpoints
 
-### Endpoint Pattern
-```
-https://opensheet.elk.sh/{SPREADSHEET_ID}/{SHEET_NAME}
-```
+### Endpoint List (v2.0 - 6 Total)
 
-### Endpoint List
-
-#### 1. DATABASE - Master Schedule
+#### 0. DB_ASC - Master Schedule (WIDE Format) ✅ NEW v2.0
 ```
-URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DATABASE
+URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DB_ASC
 Method: GET
 Auth:   None
 CORS:   Enabled
+Status: ✅ ACTIVE - Primary schedule source
 ```
 
 **Response Format:**
 ```json
 [
   {
-    "Hari": "SABTU",
-    "Jam Ke-": "1",
-    "7A": "ASW.37",
-    "7B": "ING.02",
-    "7C": "QUR.11",
+    "HARI": "SABTU",
+    "Jam-Ke": "1",
+    "7A": "BAR.23",
+    "7B": "ASW.37",
+    "7C": "ING.35",
     "8A": "MTK.44",
     "8B": "IPA.55",
     "8C": "B.IN.06",
@@ -85,40 +82,74 @@ CORS:   Enabled
     "9F": "PKN.22",
     "9G": "B.IN.06",
     "9H": "B.IB.11"
-  },
-  {
-    "Hari": "SABTU",
-    "Jam Ke-": "2",
-    "7A": "ING.02",
-    ...
   }
 ]
 ```
 
-**Column Mapping:**
-- `Hari`: Hari pelajaran (SABTU, AHAD, SENIN, SELASA, RABU, KAMIS, JUMAT)
-- `Jam Ke-`: Nomor jam (1, 2, 3, 4, 5, 6, 7)
-- `7A-9C`: 9 kelas shift pagi (PUTRA)
-- `7D-9H`: 14 kelas shift siang (PUTRI)
-- Cell values: Kode mapel format `[INITIAL].[NUMBER]`
+**Key Differences from DATABASE:**
+- Column name: `Jam-Ke` (with dash) instead of `Jam Ke-`
+- Only 6 days (no JUMAT) - 42 rows total
+- Kode format: `[INITIAL].[NUMBER]` (lookup key to DB_GURU_MAPEL)
+- Values are **ONLY kode mapel**, not guru info
+- Used with DB_GURU_MAPEL for lookup
 
-**Example Kode Mapel:**
+---
+
+#### 0.5 DB_GURU_MAPEL - Master Guru Data ✅ NEW v2.0
 ```
-ASW.37  = Akidah Akhlak, Teacher #37
-ING.02  = Bahasa Inggris, Teacher #2
-QUR.11  = Quran Hadist, Teacher #11
-MTK.44  = Matematika, Teacher #44
+URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DB_GURU_MAPEL
+Method: GET
+Auth:   None
+CORS:   Enabled
+Status: ✅ ACTIVE - Lookup source for guru info
 ```
 
-#### 2. KELAS_SHIFT - Class to Shift Mapping (⭐ NEW v2.0)
+**Response Format:**
+```json
+[
+  {
+    "KODE_GURU": "02",
+    "NAMA GURU": "Heru Yulianto M.Pd",
+    "KODE_DB_ASC": "ING.02",
+    "MAPEL_LONG": "B. INGGRIS",
+    "MAPEL_SHORT": "B.INGG",
+    "NO. WA": "6285335842568"
+  },
+  {
+    "KODE_GURU": "03",
+    "NAMA GURU": "Drs. Suwarno",
+    "KODE_DB_ASC": "IND.03",
+    "MAPEL_LONG": "B. INDONESIA",
+    "MAPEL_SHORT": "B.INDO",
+    "NO. WA": "6282301290112"
+  },
+  {
+    "KODE_GURU": "03",
+    "NAMA GURU": "Drs. Suwarno",
+    "KODE_DB_ASC": "SKU.03",
+    "MAPEL_LONG": "SKU UBUDIYAH",
+    "MAPEL_SHORT": "S K U",
+    "NO. WA": "6282301290112"
+  }
+]
+```
+
+**Key Features:**
+- Primary key: `KODE_DB_ASC` (for lookup from DB_ASC)
+- One guru can have multiple mapel (same phone, different kode)
+- Centralized guru data - update once, use everywhere
+- O(1) lookup via hash map
+
+---
+
+#### 0.75 KELAS_SHIFT - Class-to-Shift Mapping ✅ NEW v2.0
 ```
 URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/KELAS_SHIFT
 Method: GET
 Auth:   None
 CORS:   Enabled
+Status: ✅ ACTIVE - Dynamic shift configuration
 ```
-
-**Purpose:** Maps each class code to its shift (PUTRA/PUTRI)
 
 **Response Format:**
 ```json
@@ -149,16 +180,24 @@ CORS:   Enabled
 ]
 ```
 
-**Column Mapping:**
-- `KELAS`: Class code (7A-9H)
-- `SHIFT`: Shift name (PUTRA or PUTRI)
-
 **Benefits:**
-- Single source of truth for class assignments
-- Change shift assignments without code redeploy
-- Support for future class reorganizations
+- Dynamic class assignment (change shift without code redeploy)
+- Future-proof for class reorganization
+- Single source of truth for class-shift mapping
 
-#### 3. PERIODE BEL - Regular Bell Schedule
+---
+
+#### 1. DATABASE - DEPRECATED ❌
+```
+URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DATABASE
+Status: ❌ DEPRECATED
+Reason: Replaced by DB_ASC + DB_GURU_MAPEL (v2.0)
+Migration: See MIGRATION.md
+Timeline: Will be removed after 1 month stability period
+
+⚠️ Do NOT use this endpoint in new code.
+⚠️ Use DB_ASC + DB_GURU_MAPEL instead.
+```
 ```
 URL:    https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PERIODE%20BEL
 Method: GET
@@ -292,7 +331,7 @@ CORS:   Enabled
 
 ## 🔄 Fetch Implementation
 
-### Complete Fetch Flow
+### Complete Fetch Flow (v2.0 - WITH LOOKUP)
 ```javascript
 async function fetchData(forceAnnounce = false) {
   try {
@@ -312,40 +351,51 @@ async function fetchData(forceAnnounce = false) {
     const shift = jam < 12 ? 'PUTRA' : 'PUTRI';
     const timeNow = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}`;
 
-    // 2. Parallel fetch all 4 endpoints
-    const [dataDB, dataBel, dataBelK, dataPiket] = await Promise.all([
-      fetch(endpointDatabase).then(r => r.json()),
+    // 2. Parallel fetch all 6 endpoints (v2.0)
+    const [dataDbAsc, dataDbGuru, dataKelasShift, dataBel, dataBelK, dataPiket] = await Promise.all([
+      fetch(endpointDbAsc).then(r => r.json()),
+      fetch(endpointDbGuru).then(r => r.json()),
+      fetch(endpointKelasShift).then(r => r.json()),
       fetch(endpointBel).then(r => r.json()),
       fetch(endpointBelKhusus).then(r => r.json()),
       fetch(endpointPiket).then(r => r.json())
     ]);
 
     // 3. Store globally
+    globalDbAscData = dataDbAsc;
+    globalDbGuruData = dataDbGuru;
+    globalKelasShiftData = dataKelasShift;
     globalBelData = dataBel;
     globalBelKhususData = dataBelK;
-    globalJadwalData = dataDB;
+    globalPiketData = dataPiket;
 
-    // 4. Determine which BEL sheet to use
+    // 4. NEW: Create lookup map for performance (O(1) instead of O(n))
+    globalGuruLookupMap = createGuruLookupMap(dataDbGuru);
+
+    // 5. NEW: Process jadwal with lookup (transform DB_ASC using DB_GURU_MAPEL)
+    globalJadwalProcessed = processJadwalWithLookup(dataDbAsc, globalGuruLookupMap);
+
+    // 6. Determine which BEL sheet to use
     const isKamis = hari === 'KAMIS';
     const belData = isKamis ? dataBelK : dataBel;
 
-    // 5. Update UI shift indicator
+    // 7. Update UI shift indicator
     shiftKBM.textContent = `KBM ${shift}`;
 
-    // 6. Find current period
+    // 8. Find current period
     const belHariIni = belData.filter(p => p.Shift === shift);
     const periode = belHariIni.find(p => 
       timeNow >= p['Jam Mulai'] && 
       timeNow <= p['Jam Selesai']
     );
 
-    // 7. Check if in KBM period
+    // 9. Check if in KBM period
     const isInKBMPeriod = periode && periode['Jam Ke-'] !== 'IST';
 
-    // 8. Update duty teacher
+    // 10. Update duty teacher
     await updateGuruPiket(hari, jam, isInKBMPeriod);
 
-    // 9. Handle different cases
+    // 11. Handle different cases
     if (!periode) {
       // No bell period
       angkaKe.textContent = '-';
@@ -362,7 +412,7 @@ async function fetchData(forceAnnounce = false) {
       return;
     }
 
-    // 10. KBM in progress - render schedule
+    // 12. KBM in progress - render schedule
     const jamKe = periode['Jam Ke-'];
     const jamMulai = periode['Jam Mulai'];
     const jamSelesai = periode['Jam Selesai'];
@@ -370,18 +420,18 @@ async function fetchData(forceAnnounce = false) {
     angkaKe.textContent = jamKe;
     periodeJam.textContent = `${jamMulai} - ${jamSelesai}`;
 
-    // 11. Filter schedule for current period
-    const jadwal = filterSchedule(dataDB, jamKe, shift, hari);
+    // 13. NEW: Filter processed jadwal (already has guru info)
+    const jadwal = getCurrentSchedule(hari, jamKe, shift);
 
     if (jadwal.length === 0) {
       gridContainer.innerHTML = '<div>Tidak ada data jadwal untuk jam ini</div>';
       return;
     }
 
-    // 12. Render cards
+    // 14. Render cards
     renderJadwal(jadwal);
 
-    // 13. Announce if period changed
+    // 15. Announce if period changed
     if (jamKe !== lastAnnouncedJamKe || forceAnnounce) {
       lastAnnouncedJamKe = jamKe;
       announceSchedule(jadwal, jamKe, shift, isKamis);
@@ -411,63 +461,84 @@ const [dataA, dataB, dataC, dataD] = await Promise.all([
 
 ---
 
-## 🔍 Data Filtering Logic
+## � Data Filtering Logic (v2.0 - WITH LOOKUP)
 
-### Filter by Hari + Jam Ke- + Shift
+### Lookup Pattern (O(1) Hash Map)
 ```javascript
-function filterSchedule(dbData, jamKe, shift, hari) {
-  // 1. Find matching row
-  const row = dbData.find(r => 
-    r['Hari'].trim().toUpperCase() === hari &&
-    r['Jam Ke-'].trim() === jamKe
-  );
-  
-  if (!row) return [];
-
-  // 2. Determine which kelas for this shift
-  const kelasMap = shift === 'PUTRA'
-    ? {
-        '7A': row['7A'],
-        '7B': row['7B'],
-        '7C': row['7C'],
-        '8A': row['8A'],
-        '8B': row['8B'],
-        '8C': row['8C'],
-        '9A': row['9A'],
-        '9B': row['9B'],
-        '9C': row['9C']
-      }
-    : {
-        '7D': row['7D'],
-        '7E': row['7E'],
-        '7F': row['7F'],
-        '7G': row['7G'],
-        '8D': row['8D'],
-        '8E': row['8E'],
-        '8F': row['8F'],
-        '8G': row['8G'],
-        '8H': row['8H'],
-        '9D': row['9D'],
-        '9E': row['9E'],
-        '9F': row['9F'],
-        '9G': row['9G'],
-        '9H': row['9H']
-      };
-
-  // 3. Extract non-empty values
-  const jadwal = [];
-  Object.entries(kelasMap).forEach(([kelas, kode]) => {
-    if (kode && kode.trim()) {
-      jadwal.push({
-        Kelas: kelas,
-        Kode: kode.trim(),
-        'Nama Mapel': 'TBD',  // Would need lookup
-        'Nama Lengkap Guru': 'TBD'
+// Step 1: Create lookup map once after fetch (O(n) one-time cost)
+function createGuruLookupMap(dbGuruData) {
+  const lookupMap = new Map();
+  dbGuruData.forEach(row => {
+    const kode = row['KODE_DB_ASC'];
+    if (kode) {
+      lookupMap.set(kode, {
+        namaGuru: row['NAMA GURU'],
+        mapelLong: row['MAPEL_LONG'],
+        mapelShort: row['MAPEL_SHORT'],
+        noWa: row['NO. WA']
       });
     }
   });
+  return lookupMap;
+}
 
-  return jadwal;
+// Step 2: Use map for O(1) lookups
+const guruInfo = lookupMap.get('ING.02');  // ~0.001ms
+// Result: {namaGuru: "Heru Yulianto", mapelShort: "B.INGG", ...}
+```
+
+### Process Jadwal With Lookup
+```javascript
+function processJadwalWithLookup(dbAscData, guruLookupMap) {
+  const processed = [];
+  const kelasPagi = ['7A', '7B', '7C', '8A', '8B', '8C', '9A', '9B', '9C'];
+  const kelasSiang = ['7D', '7E', '7F', '7G', '8D', '8E', '8F', '8G', '8H', '9D', '9E', '9F', '9G', '9H'];
+  const allKelas = [...kelasPagi, ...kelasSiang];
+  
+  dbAscData.forEach(row => {
+    const hari = row['HARI'];
+    const jamKe = row['Jam-Ke'];
+    
+    allKelas.forEach(kelas => {
+      const kodeDbAsc = row[kelas];
+      
+      if (kodeDbAsc && kodeDbAsc.trim() !== '') {
+        const guruInfo = guruLookupMap.get(kodeDbAsc);
+        
+        if (guruInfo) {
+          processed.push({
+            hari: hari,
+            jamKe: jamKe,
+            kelas: kelas,
+            shift: kelasPagi.includes(kelas) ? 'PUTRA' : 'PUTRI',
+            kodeDbAsc: kodeDbAsc,
+            namaGuru: guruInfo.namaGuru,
+            mapelLong: guruInfo.mapelLong,
+            mapelShort: guruInfo.mapelShort,
+            noWa: guruInfo.noWa
+          });
+        } else {
+          console.warn(`Guru not found for kode: ${kodeDbAsc}`);
+        }
+      }
+    });
+  });
+  
+  return processed;
+}
+```
+
+### Filter by Hari + Jam Ke + Shift (Simple After Processing)
+```javascript
+function getCurrentSchedule(hari, jamKe, shift) {
+  // Simple filter - data already processed and joined
+  return globalJadwalProcessed.filter(item => 
+    item.hari === hari && 
+    item.jamKe === String(jamKe) && 
+    item.shift === shift
+  );
+  
+  // Returns: [{kelas: '7A', namaGuru: 'Heru Yulianto', mapelShort: 'B.INGG', ...}, ...]
 }
 ```
 
@@ -630,7 +701,7 @@ curl -s https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DA
 
 ---
 
-**Last Updated:** Desember 2024
-**API Version:** 1.0 (OpenSheet)
-**Documentation Version:** 1.0
+**Last Updated:** Desember 2025  
+**API Version:** 2.0 (OpenSheet + Lookup Pattern)  
+**Documentation Version:** 2.0
 

@@ -32,43 +32,60 @@ Check errors (red text)
   ├─ TypeError? → Issue #3
   ├─ No errors → Continue
   ↓
-Type in console: console.log(globalJadwalData?.length)
+Type in console: console.log({db: globalDbAscData?.length, guru: globalDbGuruData?.length, map: globalGuruLookupMap?.size})
   ├─ undefined or 0 → Google Sheets not accessible
-  ├─ > 0 → Data loaded, filtering problem
+  ├─ map size === 0 → DB_GURU_MAPEL empty or wrong format
+  ├─ > 0 for all → Data loaded, filtering problem
+  ↓
+Check lookup: globalGuruLookupMap.get('BAR.23')
+  ├─ undefined → Code not in DB_GURU_MAPEL
+  ├─ object → Lookup works, filtering issue
   ↓
 Trace filtering logic:
   - Check current hari, jamKe, shift values
   - Verify they match spreadsheet values
-  - Check for case sensitivity
+  - Check for case sensitivity in HARI column
 ```
 
 ### Solutions
 
-#### Solution 1a: Check Google Sheets Access
+#### Solution 1a: Check Google Sheets Access (v2.0 - 6 Sheets)
 ```javascript
-// In console:
-fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DATABASE')
-  .then(r => r.json())
-  .then(data => console.log('Success:', data.length, 'rows'))
-  .catch(e => console.error('Error:', e));
+// In console - test all 6 endpoints:
+Promise.all([
+  fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DB_ASC').then(r => r.json()),
+  fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DB_GURU_MAPEL').then(r => r.json()),
+  fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/KELAS_SHIFT').then(r => r.json()),
+  fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PERIODE%20BEL').then(r => r.json()),
+  fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/BEL%20KHUSUS').then(r => r.json()),
+  fetch('https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PIKET').then(r => r.json())
+]).then(([asc, guru, shift, bel, belk, piket]) => {
+  console.log('DB_ASC:', asc.length);
+  console.log('DB_GURU_MAPEL:', guru.length);
+  console.log('KELAS_SHIFT:', shift.length);
+  console.log('All sheets OK ✅');
+}).catch(e => console.error('Error:', e));
 ```
 
 **Expected Output:**
-```
-Success: 56 rows  (7 days × 8 periods)
-```
-
-**If you see error:**
-- Check Google Sheets is public (Share > Anyone with link > Viewer)
-- Verify Spreadsheet ID is correct
-- Try accessing in incognito window
-
-#### Solution 1b: Verify Column Names Match
+```& Data Structure (v2.0)
 ```javascript
 // In console:
-console.log(globalJadwalData[0]);  // Print first row
+console.log('DB_ASC sample:', globalDbAscData[0]);
+console.log('DB_GURU sample:', globalDbGuruData[0]);
+console.log('Lookup test:', globalGuruLookupMap.get('BAR.23'));
 
 // Look for:
+// DB_ASC: "HARI", "Jam-Ke" (with dash!), "7A", "7B", ... "9H" columns
+// DB_GURU: "KODE_GURU", "NAMA GURU", "KODE_DB_ASC" (primary key), "MAPEL_LONG", "MAPEL_SHORT", "NO. WA"
+// Lookup result: {namaGuru: "...", mapelShort: "...", mapelLong: "...", noWa: "..."}
+```
+
+**Common Issues:**
+- Column named "Jam Ke" (no dash) instead of "Jam-Ke"
+- KODE_DB_ASC misspelled or named differently
+- Extra spaces in column names or values
+- Guru codes don't match between sheet
 // - "Hari" column
 // - "Jam Ke-" column (with dash!)
 // - "7A", "7B", etc. columns
@@ -642,8 +659,8 @@ Before Going Live:
 - Offline caching
 - Service worker
 - Mobile app
-
----
+5  
+**Troubleshooting Version:** 2.0.0 (v2.0 Migration)
 
 **Last Updated:** Desember 2024
 **Troubleshooting Version:** 1.0.0

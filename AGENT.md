@@ -58,16 +58,71 @@ Proyek ini telah melalui beberapa fase:
 
 #### Sheet 1: DATABASE
 ```
-Kolom A: Hari (SABTU, AHAD, SENIN, SELASA, RABU, KAMIS, JUMAT)
-Kolom B: Jam Ke- (1, 2, 3, 4, 5, 6, 7)
-Kolom C-K: Pagi (7A, 7B, 7C, 8A, 8B, 8C, 9A, 9B, 9C)
-Kolom L-Y: Siang (7D, 7E, 7F, 7G, 8D, 8E, 8F, 8G, 8H, 9D, 9E, 9F, 9G, 9H)
-
-Contoh row:
-SABTU | 1 | ASW.37 | ING.02 | ... (kode mapel untuk 23 kelas)
+❌ DEPRECATED - Do not use for new development
+⚠️ Will be removed after migration stabilization period
 ```
 
-#### Sheet 2: PERIODE BEL
+#### Sheet 1: DB_ASC ✅ NEW (v2.0)
+```
+Kolom A: Hari (SABTU, AHAD, SENIN, SELASA, RABU, KAMIS, TIDAK ADA JUMAT)
+Kolom B: Jam Ke- (1, 2, 3, 4, 5, 6, 7)
+Kolom C-K: Pagi (7A, 7B, 7C, 8A, 8B, 8C, 9A, 9B, 9C) [9 kelas]
+Kolom L-Y: Siang (7D, 7E, 7F, 7G, 8D, 8E, 8F, 8G, 8H, 9D, 9E, 9F, 9G, 9H) [14 kelas]
+Total: 23 kelas, 42 rows (6 hari × 7 jam)
+
+Contoh row:
+SABTU | 1 | BAR.23 | ASW.37 | ING.35 | MTK.44 | IPA.55 | B.IN.06 | AGL.99 | OL.33 | PKN.22 | ASW.37 | FIQ.18 | HAD.25 | ING.02 | MTK.77 | IPA.88 | SEJ.44 | BIO.55 | KIM.66 | AGL.99 | OL.33 | PKN.22 | B.IN.06 | B.IB.11
+```
+
+#### Sheet 2: DB_GURU_MAPEL ✅ NEW (v2.0 - Master Data)
+```
+Kolom A: KODE_GURU (01, 02, 03, ..., 99)
+Kolom B: NAMA GURU (Full name, e.g., "Heru Yulianto M.Pd")
+Kolom C: KODE_DB_ASC (Kode dari DB_ASC, e.g., "ING.02")
+Kolom D: MAPEL_LONG (Full mapel name, e.g., "B. INGGRIS")
+Kolom E: MAPEL_SHORT (Short name, e.g., "B.INGG")
+Kolom F: NO. WA (WhatsApp number, e.g., "628533584...")
+Total: ~100+ rows (satu guru bisa multiple mapel)
+
+Contoh rows:
+KODE_GURU | NAMA GURU | KODE_DB_ASC | MAPEL_LONG | MAPEL_SHORT | NO. WA
+02 | Heru Yulianto M.Pd | ING.02 | B. INGGRIS | B.INGG | 628533584...
+03 | Drs. Suwarno | IND.03 | B. INDONESIA | B.INDO | 628230129...
+03 | Drs. Suwarno | SKU.03 | SKU UBUDIYAH | S K U | 628230129...
+```
+
+#### Sheet 3: KELAS_SHIFT ✅ NEW (v2.0 - Helper Sheet)
+```
+Kolom A: KELAS (7A, 7B, 7C, ..., 9H)
+Kolom B: SHIFT (PUTRA atau PUTRI)
+Total: 23 rows (one per kelas)
+
+Data:
+KELAS | SHIFT
+7A | PUTRA
+7B | PUTRA
+7C | PUTRA
+8A | PUTRA
+8B | PUTRA
+8C | PUTRA
+9A | PUTRA
+9B | PUTRA
+9C | PUTRA
+7D | PUTRI
+7E | PUTRI
+7F | PUTRI
+7G | PUTRI
+8D | PUTRI
+8E | PUTRI
+8F | PUTRI
+8G | PUTRI
+8H | PUTRI
+9D | PUTRI
+9E | PUTRI
+9F | PUTRI
+9G | PUTRI
+9H | PUTRI
+```
 ```
 Shift | Jam Ke- | Jam Mulai | Jam Selesai | [Catatan]
 PUTRA | 1       | 06:30     | 07:15
@@ -117,26 +172,50 @@ Google Sheets (5 sheets)
 https://opensheet.elk.sh/{SPREADSHEET_ID}/{SHEET_NAME}
 ```
 
-### Actual Endpoints
+### Actual Endpoints (v2.0 - WITH KELAS_SHIFT)
 ```javascript
-const endpointDatabase = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DATABASE'
+const endpointDbAsc = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DB_ASC'
+const endpointDbGuru = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/DB_GURU_MAPEL'
+const endpointKelasShift = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/KELAS_SHIFT'
 const endpointBel = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PERIODE%20BEL'
 const endpointBelKhusus = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/BEL%20KHUSUS'
 const endpointPiket = 'https://opensheet.elk.sh/1LgqAr0L66JLtygqTqZRXOMKT06_IMopYlsEGc5nVp4I/PIKET'
+
+// Total: 6 endpoints (4 main + 2 helper)
+// Fetch pattern: Promise.all() - parallel execution
 ```
 
-### Response Format
+### Response Format (v2.0)
 ```javascript
-// Returns: Array of Objects
+// DB_ASC Response: Jadwal dalam WIDE format
 [
   {
-    "Hari": "SABTU",
+    "HARI": "SABTU",
     "Jam Ke-": "1",
-    "7A": "ASW.37",
-    "7B": "ING.02",
+    "7A": "BAR.23",
+    "7B": "ASW.37",
     // ... semua 23 kelas
-  },
-  // ... satu row per jam per hari
+    "9H": "B.IB.11"
+  }
+]
+
+// DB_GURU_MAPEL Response: Master data guru dengan lookup keys
+[
+  {
+    "KODE_GURU": "02",
+    "NAMA GURU": "Heru Yulianto M.Pd",
+    "KODE_DB_ASC": "ING.02",    // PRIMARY KEY untuk lookup
+    "MAPEL_LONG": "B. INGGRIS",
+    "MAPEL_SHORT": "B.INGG",
+    "NO. WA": "628533584..."
+  }
+]
+
+// KELAS_SHIFT Response: Dynamic class-to-shift mapping
+[
+  {"KELAS": "7A", "SHIFT": "PUTRA"},
+  {"KELAS": "7D", "SHIFT": "PUTRI"},
+  // ... semua 23 kelas
 ]
 ```
 
@@ -169,18 +248,27 @@ script.js (823 lines)
 
 ### Key Functions Reference
 
-#### Data Operations
+#### Data Operations (v2.0)
 ```javascript
-fetchData(forceAnnounce = false)
-  // Main orchestration function
-  // Called: Every 15 seconds + on manual trigger
-  // Does: Fetch all sheets → determine current Jam Ke → render
-  // Returns: void (updates globalVar & DOM)
+createGuruLookupMap(dbGuruData)
+  // Create O(1) hash map from KODE_DB_ASC → guru info
+  // Called once after fetchData
+  // Returns: Map<kode, {namaGuru, mapelShort, mapelLong, noWa}>
 
-convertDatabaseToJadwal(dbData, jamKe, shift, hari)
-  // (if implemented) Transform raw data to display format
-  // Filter by: day + jam + shift
-  // Returns: [{Kelas, Mapel, Guru}, ...]
+lookupGuruInfo(kodeDbAsc, lookupMap)
+  // O(1) lookup guru info by kode
+  // Used during jadwal processing
+  // Returns: {namaGuru, mapelShort, mapelLong, noWa} atau null
+
+processJadwalWithLookup(dbAscData, guruLookupMap)
+  // Transform DB_ASC + lookup to processed jadwal
+  // Iterates all rows × kelas, performs lookup
+  // Returns: [{hari, jamKe, kelas, shift, namaGuru, mapelShort, ...}, ...]
+
+getCurrentSchedule(hari, jamKe, shift)
+  // Filter processed jadwal by day + period + shift
+  // Used for rendering current schedule
+  // Returns: [{kelas, namaGuru, mapelShort}, ...]
 ```
 
 #### Time Management
@@ -226,12 +314,17 @@ showFullSchedule(targetShift = 'SEMUA')
 
 ## 🔄 Event Loops & Timing
 
-### Automatic Intervals
+#### Automatic Intervals (v2.0 - Optimized)
 ```javascript
 setInterval(updateClock, 1000)           // Every 1 second
-setInterval(fetchData, 15000)            // Every 15 seconds
+setInterval(fetchData, 15000)            // Every 15 seconds (6 sheets)
 setInterval(voiceSync, 30000)            // Every 30 seconds (voice refresh)
 setInterval(inactivityCheck, 30000)      // Every 30 seconds
+
+// Parallel Performance:
+// 6 sheets × ~500ms each → ~500ms total (not 3000ms sequential)
+// Lookup processing: <100ms for 42 rows × 23 kelas
+// Total cycle: <600ms ✅
 ```
 
 ### Manual Triggers
@@ -295,17 +388,21 @@ Control Panel (Right Sidebar - Hidden by default)
 **Root Cause Options:**
 1. fetchData() tidak dipanggil
 2. API unreachable
-3. Data format berubah
+3. Data format berubah (check KODE_DB_ASC column name)
 4. Time calculation salah
+5. Lookup gagal (missing entries di DB_GURU_MAPEL)
 
 **Debug Steps:**
 ```javascript
 // In console:
-1. Check: globalBelData?.length
-2. Check: globalJadwalData?.length
-3. Check current time vs BEL data
-4. Check network tab for failed requests
-5. Log: console.log(globalBelData[0])
+1. Check: globalDbAscData?.length
+2. Check: globalDbGuruData?.length
+3. Check: globalGuruLookupMap?.size
+4. Check current time vs BEL data
+5. Check network tab for failed requests
+6. Log: console.log(globalDbGuruData[0])
+7. Log: console.log(globalGuruLookupMap)
+8. Test lookup: globalGuruLookupMap.get('BAR.23')
 ```
 
 ### Issue: Pengumuman berulang
@@ -570,7 +667,8 @@ When taking on new tasks:
 
 ---
 
-**Last Updated:** Desember 2024
-**Version:** 1.0.0
+**Last Updated:** Desember 2025  
+**Version:** 2.0.0 (v2.0 Migration Complete)  
+**Architecture:** DB_ASC + DB_GURU_MAPEL with O(1) lookup mapping  
 **Maintained By:** AI Development Agent + Human Team
 

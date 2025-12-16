@@ -676,6 +676,8 @@ Status: ✅ Allowed by opensheet CORS policy
 
 ---
 
-**Last Updated:** Desember 2024
+**Last Updated:** Desember 2025  
+**Architecture Version:** 2.0 (v2.0 Migration Complete)  
+**Format:** WIDE (DB_ASC) + Lookup Pattern (DB_GURU_MAPEL)
 **Document Version:** 1.0.0
 

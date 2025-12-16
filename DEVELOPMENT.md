@@ -327,35 +327,32 @@ Check:
 
 ## 🎯 Common Development Tasks
 
-### Task 1: Add New Sheet Data
+### Task 1: Add New Sheet Data (v2.0)
 
 #### Files to Modify
 1. `script.js` - Add endpoint constant
 2. `script.js` - Add to fetchData() Promise.all()
 3. `script.js` - Add global variable for data
-4. Filter/render logic as needed
+4. Lookup/processing logic if data is guru-related
 
-#### Example: Add GURU_MAPEL Sheet
+#### Example: Add GURU_MAPEL Lookup (Already Done in v2.0)
 ```javascript
 // script.js, line 4
-const sheetGuruMapel = 'GURU_MAPEL';
-
-// script.js, line 10
-const endpointGuruMapel = `https://opensheet.elk.sh/${spreadsheetID}/${sheetGuruMapel}`;
+const endpointDbGuru = 'https://opensheet.elk.sh/${SPREADSHEET_ID}/DB_GURU_MAPEL';
 
 // script.js, line 26
-let globalGuruMapel = null;
+let globalDbGuruData = null;
+let globalGuruLookupMap = null;  // Hash map for O(1) lookup
 
 // script.js, in fetchData()
-const [dataDB, dataBel, dataBelK, dataPiket, dataGuruMapel] = await Promise.all([
-  fetch(endpointDatabase).then(r => r.json()),
-  fetch(endpointBel).then(r => r.json()),
-  fetch(endpointBelKhusus).then(r => r.json()),
-  fetch(endpointPiket).then(r => r.json()),
-  fetch(endpointGuruMapel).then(r => r.json())  // NEW
+const [dataDbAsc, dataDbGuru, ...rest] = await Promise.all([
+  fetch(endpointDbAsc).then(r => r.json()),
+  fetch(endpointDbGuru).then(r => r.json()),  // NEW
+  ...
 ]);
 
-globalGuruMapel = dataGuruMapel;  // Store globally
+globalGuruLookupMap = createGuruLookupMap(dataDbGuru);  // NEW
+globalJadwalProcessed = processJadwalWithLookup(dataDbAsc, globalGuruLookupMap);  // NEW
 ```
 
 ### Task 2: Modify Theme
@@ -728,6 +725,6 @@ v1.2.3
 
 ---
 
-**Last Updated:** Desember 2024
-**Development Guide Version:** 1.0.0
+**Last Updated:** Desember 2025
+**Development Guide Version:** 2.0.0 (v2.0 Architecture)
 
