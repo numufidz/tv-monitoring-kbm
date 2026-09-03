@@ -185,24 +185,22 @@ async function updateGuruPiket(hari, jam, isInKBMPeriod = false) {
 
 /**
  * Build guru lookup map dari DB_GURU_MAPEL
- * Maps MAPEL_LONG (kode DB_ASC, e.g. "BAR.23") → {nama_guru, mapel}
- * Key diubah dari KODE_DB_ASC ke MAPEL_LONG agar cocok dengan nilai di kolom kelas pada DB_ASC
+ * Maps KODE_DB_ASC → {nama_guru, mapel}
  */
 function createGuruLookupMap(dbGuruMapelData) {
   const map = new Map();
   if (!dbGuruMapelData || !Array.isArray(dbGuruMapelData)) return map;
-
+  
   dbGuruMapelData.forEach(row => {
-    const kode = row['MAPEL_LONG'];   // "BAR.23" → cocok dengan nilai di DB_ASC ✅
+    const kode = row['KODE_DB_ASC'];
     if (kode && kode.trim()) {
       map.set(kode.trim(), {
         nama_guru: row['NAMA GURU'] || '',
-        mapel: row['MAPEL_SHORT'] || row['MAPEL_LONG'] || '',  // Tampilkan singkatan ("B. ARAB") ✅
-        telepon: row['NO. WA'] || row['WHATSAPP'] || row['WA'] || '628123456789'
+        mapel: row['MAPEL_LONG'] || row['MAPEL_SHORT'] || ''
       });
     }
   });
-
+  
   return map;
 }
 
@@ -213,7 +211,7 @@ function createGuruLookupMap(dbGuruMapelData) {
 function createKelasShiftMap(kelasShiftData) {
   const map = new Map();
   if (!kelasShiftData || !Array.isArray(kelasShiftData)) return map;
-
+  
   kelasShiftData.forEach(row => {
     const kelas = row['KELAS'];
     const shift = row['SHIFT'];
@@ -221,7 +219,7 @@ function createKelasShiftMap(kelasShiftData) {
       map.set(kelas.trim(), shift.trim());
     }
   });
-
+  
   return map;
 }
 
@@ -232,31 +230,31 @@ function createKelasShiftMap(kelasShiftData) {
  */
 function transformDbAscWideToLong(dbAscWideData, guruLookupMap, kelasShiftMap) {
   if (!dbAscWideData || !Array.isArray(dbAscWideData)) return [];
-
+  
   const result = [];
-
+  
   // Get all class keys from kelasShiftMap (dynamic from KELAS_SHIFT sheet)
   const allClasses = Array.from(kelasShiftMap.keys()).sort();
-
+  
   // Process each row
   dbAscWideData.forEach((row) => {
     const hari = row['HARI'];
     const jamKe = row['Jam Ke-'];
-
+    
     // Skip rows without HARI or Jam Ke-
     if (!hari || !jamKe) return;
-
+    
     // Process each class column
     allClasses.forEach(kelas => {
       const kode = row[kelas];
-
+      
       // Skip empty codes
       if (!kode || !kode.trim()) return;
-
+      
       const kodeTrim = kode.trim();
-      const guruInfo = guruLookupMap.get(kodeTrim) || { nama_guru: '', mapel: '', telepon: '628123456789' };
+      const guruInfo = guruLookupMap.get(kodeTrim) || { nama_guru: '', mapel: '' };
       const shift = kelasShiftMap.get(kelas) || 'UNKNOWN';
-
+      
       result.push({
         Hari: hari,
         'Jam Ke-': jamKe.toString(),
@@ -264,12 +262,11 @@ function transformDbAscWideToLong(dbAscWideData, guruLookupMap, kelasShiftMap) {
         Kelas: kelas,
         KODE_DB_ASC: kodeTrim,
         'Nama Mapel': guruInfo.mapel,
-        'Nama Lengkap Guru': guruInfo.nama_guru,
-        'Telepon': guruInfo.telepon
+        'Nama Lengkap Guru': guruInfo.nama_guru
       });
     });
   });
-
+  
   return result;
 }
 
@@ -329,7 +326,7 @@ async function fetchData(forceAnnounce = false) {
     globalKelasShiftData = dataKelasShift;
     globalBelData = dataBel;
     globalBelKhususData = dataBelKhusus;
-
+    
     // Transform WIDE format → LONG format dan join dengan guru info
     globalGuruLookupMap = createGuruLookupMap(dataDbGuruMapel);
     globalKelasShiftMap = createKelasShiftMap(dataKelasShift);
@@ -408,7 +405,6 @@ async function fetchData(forceAnnounce = false) {
       const card = document.createElement("div");
       card.className = "card";
       card.style.fontSize = `${currentFontSize}rem`;
-      card.onclick = () => showClassDetail(row, jamMulai, jamSelesai);
       card.innerHTML = `
         <div class="kelas-box">${row.Kelas}</div>
         <div class="info-box">
@@ -634,88 +630,6 @@ function adjustDay(offset) {
   fetchData();
 }
 
-/**
- * Menunjukkan detail kelas (Progres KBM & QR WhatsApp) - 1:1 SQUARE VERSION
- */
-function showClassDetail(row, jamMulai, jamSelesai) {
-  const modal = document.getElementById('scheduleModal');
-  const content = document.getElementById('scheduleContent');
-  const modalContent = modal.querySelector('.modal-content');
-
-  // Aktifkan mode square
-  modalContent.classList.add('square');
-
-  // Kalkulasi Progres
-  const now = new Date();
-  now.setHours(now.getHours() + timeOffset);
-  now.setMinutes(now.getMinutes() + timeOffsetMinutes);
-
-  const [hStart, mStart] = jamMulai.split(':').map(Number);
-  const [hEnd, mEnd] = jamSelesai.split(':').map(Number);
-
-  const startTime = new Date(now);
-  startTime.setHours(hStart, mStart, 0);
-
-  const endTime = new Date(now);
-  endTime.setHours(hEnd, mEnd, 0);
-
-  const totalDuration = (endTime - startTime) / (1000 * 60);
-  const elapsed = (now - startTime) / (1000 * 60);
-  let percent = Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100);
-  const remaining = Math.max(Math.ceil(totalDuration - elapsed), 0);
-
-  // WhatsApp QR
-  const phone = row.Telepon.replace(/[^0-9]/g, '');
-  const waUrl = `https://wa.me/${phone}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(waUrl)}`;
-
-  content.innerHTML = `
-    <div style="width: 100%; text-align: center; color: white;">
-      <!-- Header -->
-      <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px;">
-        <div style="background: #FFD700; color: #000; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 900; font-size: 1.8rem; flex-shrink: 0;">${row.Kelas}</div>
-        <div style="text-align: left;">
-          <div style="font-weight: bold; color: #00ffff; font-size: 1rem; line-height: 1.2;">${row['Nama Mapel']}</div>
-          <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 2px;">${row['Nama Lengkap Guru']}</div>
-        </div>
-      </div>
-      
-      <!-- Progress Section -->
-      <div style="margin-bottom: 25px; width: 100%;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.8rem; font-weight: bold;">
-          <span>Progres</span>
-          <span>${Math.round(percent)}%</span>
-        </div>
-        <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-          <div style="width: ${percent}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 1s ease-in-out;"></div>
-        </div>
-        <div style="font-size: 0.8rem; margin-top: 10px; color: ${remaining > 0 ? '#aaa' : '#ff4b2b'}; font-weight: 500;">
-          ${remaining > 0 ? `Sisa: <strong>${remaining} menit</strong>` : 'Waktu Habis'}
-        </div>
-      </div>
-
-      <!-- QR & Action -->
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-        <div style="background: white; padding: 5px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-          <img src="${qrUrl}" alt="QR WA" style="width: 100px; height: 100px; display: block;">
-        </div>
-        <a href="${waUrl}" target="_blank" 
-           style="text-decoration: none; background: #25d366; color: white; padding: 10px 20px; border-radius: 25px; font-size: 0.85rem; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
-           📱 Hubungi Guru
-        </a>
-      </div>
-
-      <!-- Close Button (Simplified) -->
-      <div style="margin-top: 25px;">
-        <button onclick="closeSchedule()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #888; padding: 5px 15px; border-radius: 15px; cursor: pointer; font-size: 0.7rem;">
-          Tutup Detail
-        </button>
-      </div>
-    </div>
-  `;
-  modal.style.display = 'flex';
-}
-
 // Fungsi untuk memuat daftar suara dan mengisi dropdown
 function loadVoices() {
   const voices = window.speechSynthesis.getVoices();
@@ -865,9 +779,6 @@ function showSchedule() {
   const modal = document.getElementById('scheduleModal');
   const content = document.getElementById('scheduleContent');
 
-  // Pastikan mode square mati
-  modal.querySelector('.modal-content').classList.remove('square');
-
   if (!globalBelData || !globalBelKhususData) {
     alert("Data jadwal belum dimuat. Tunggu sebentar...");
     return;
@@ -933,9 +844,7 @@ function showSchedule() {
 }
 
 function closeSchedule() {
-  const modal = document.getElementById('scheduleModal');
-  modal.style.display = 'none';
-  modal.querySelector('.modal-content').classList.remove('square');
+  document.getElementById('scheduleModal').style.display = 'none';
 }
 
 // Tutup modal jika klik di luar area konten
@@ -946,12 +855,9 @@ window.onclick = function (event) {
   }
 }
 
-function showFullSchedule(targetShift = 'SEMUA', viewMode = 'MAPEL') {
+function showFullSchedule(targetShift = 'SEMUA') {
   const modal = document.getElementById('scheduleModal');
   const content = document.getElementById('scheduleContent');
-
-  // Pastikan mode square mati
-  modal.querySelector('.modal-content').classList.remove('square');
 
   if (!globalJadwalData) {
     alert("Data jadwal belum dimuat. Tunggu sebentar...");
@@ -1006,8 +912,8 @@ function showFullSchedule(targetShift = 'SEMUA', viewMode = 'MAPEL') {
         <td style="border: 1px solid rgba(255,255,255,0.2); padding: 6px; text-align: center; font-weight: bold; background: rgba(255,255,255,0.05);">${jam}</td>`;
       classes.forEach(cls => {
         const entry = scheduleToday.find(d => parseInt(d['Jam Ke-']) === jam && d.Kelas === cls);
-        const displayValue = entry ? (viewMode === 'GURU' ? entry['Nama Lengkap Guru'] : entry['Nama Mapel']) : '-';
-        tableHtml += `<td style="border: 1px solid rgba(255,255,255,0.2); padding: 6px; text-align: center;">${displayValue}</td>`;
+        const mapel = entry ? entry['Nama Mapel'] : '-';
+        tableHtml += `<td style="border: 1px solid rgba(255,255,255,0.2); padding: 6px; text-align: center;">${mapel}</td>`;
       });
       tableHtml += `</tr>`;
     }
@@ -1020,19 +926,7 @@ function showFullSchedule(targetShift = 'SEMUA', viewMode = 'MAPEL') {
   let titleShift = targetShift === 'SEMUA' ? 'LENGKAP' : targetShift;
   let html = `
     <h2 style="text-align: center; margin-bottom: 5px; color: #fff;">JADWAL PELAJARAN ${titleShift}</h2>
-    <h3 style="text-align: center; margin-bottom: 20px; color: #00ffff;">HARI: ${hari}</h3>
-    
-    <!-- Tombol Toggle Tampilan -->
-    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 25px;">
-      <button onclick="showFullSchedule('${targetShift}', 'MAPEL')" 
-              style="width: auto; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; background: ${viewMode === 'MAPEL' ? '#667eea' : 'rgba(255,255,255,0.1)'}; border: 1px solid ${viewMode === 'MAPEL' ? '#667eea' : 'rgba(255,255,255,0.3)'};">
-        📚 Mata Pelajaran
-      </button>
-      <button onclick="showFullSchedule('${targetShift}', 'GURU')" 
-              style="width: auto; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; background: ${viewMode === 'GURU' ? '#667eea' : 'rgba(255,255,255,0.1)'}; border: 1px solid ${viewMode === 'GURU' ? '#667eea' : 'rgba(255,255,255,0.3)'};">
-        👨‍🏫 Nama Guru
-      </button>
-    </div>
+    <h3 style="text-align: center; margin-bottom: 25px; color: #00ffff;">HARI: ${hari}</h3>
   `;
 
   if (targetShift === 'PAGI') {
