@@ -499,10 +499,98 @@ async function fetchData(forceAnnounce = false) {
     }
   }
 }
+// ─── Helpers: Cache First → Network Background ─────────────────────────────────────
 
-// Jalankan fetchData setiap 15 detik
-setInterval(fetchData, 15000);
-fetchData();
+/** Ambil konteks waktu saat ini */
+function getCurrentTimeContext() {
+  const now = new Date();
+  now.setHours(now.getHours() + timeOffset);
+  now.setMinutes(now.getMinutes() + timeOffsetMinutes);
+  now.setDate(now.getDate() + dayOffset);
+  const jam = now.getHours();
+  const menit = now.getMinutes();
+  let hari = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+  if (hari === 'MINGGU') hari = 'AHAD';
+  const shift = jam < 12 ? 'PUTRA' : 'PUTRI';
+  const timeNow = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}`;
+  const isKamis = hari === 'KAMIS';
+  return { jam, menit, hari, shift, timeNow, isKamis };
+}
+
+/** Tampilkan data dari cache secara INSTAN — kembalikan true jika cache ada */
+function showFromCache(forceAnnounce = false) {
+  const cachedDbAsc      = loadCache(CACHE_KEY_DB_ASC);
+  const cachedGuruMapel  = loadCache(CACHE_KEY_GURU_MAPEL);
+  const cachedKelasShift = loadCache(CACHE_KEY_KELAS_SHIFT);
+  const cachedBel        = loadCache(CACHE_KEY_BEL);
+  const cachedBelKhusus  = loadCache(CACHE_KEY_BEL_KHUSUS);
+  const cachedPiket      = loadCache(CACHE_KEY_PIKET);
+
+  if (!cachedDbAsc || !cachedGuruMapel || !cachedKelasShift || !cachedBel || !cachedBelKhusus) {
+    return false;
+  }
+
+  const { jam, hari, shift, timeNow, isKamis } = getCurrentTimeContext();
+  updateConnectionStatus('offline');
+  processAndDisplay(cachedDbAsc, cachedGuruMapel, cachedKelasShift, cachedBel, cachedBelKhusus,
+    cachedPiket, hari, jam, shift, timeNow, isKamis, forceAnnounce);
+  return true;
+}
+
+/** Fetch dari network di background, perbarui UI diam-diam saat selesai */
+async function refreshFromNetwork(forceAnnounce = false) {
+  const { jam, hari, shift, timeNow, isKamis } = getCurrentTimeContext();
+  try {
+    console.log('[Network] Background refresh...');
+    const [dataDbAsc, dataDbGuruMapel, dataKelasShift, dataBel, dataBelKhusus, dataPiket] = await Promise.all([
+      fetch(endpointDbAsc).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(endpointDbGuruMapel).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(endpointKelasShift).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(endpointBel).then(r => r.json()),
+      fetch(endpointBelKhusus).then(r => r.json()),
+      fetch(endpointPiket).then(r => r.json())
+    ]);
+
+    saveCache(CACHE_KEY_DB_ASC, dataDbAsc);
+    saveCache(CACHE_KEY_GURU_MAPEL, dataDbGuruMapel);
+    saveCache(CACHE_KEY_KELAS_SHIFT, dataKelasShift);
+    saveCache(CACHE_KEY_BEL, dataBel);
+    saveCache(CACHE_KEY_BEL_KHUSUS, dataBelKhusus);
+    saveCache(CACHE_KEY_PIKET, dataPiket);
+    localStorage.setItem(CACHE_KEY_TIMESTAMP, Date.now().toString());
+
+    updateConnectionStatus('online');
+    processAndDisplay(dataDbAsc, dataDbGuruMapel, dataKelasShift, dataBel, dataBelKhusus,
+      dataPiket, hari, jam, shift, timeNow, isKamis, forceAnnounce);
+    console.log('[Network] Data diperbarui dari server.');
+  } catch (err) {
+    console.warn('[Network] Background refresh gagal:', err.message);
+    updateConnectionStatus('offline');
+  }
+}
+
+/**
+ * Strategi utama: Cache First → Network Background (Stale-While-Revalidate)
+ * 1. Tampilkan cache INSTAN (0ms delay)
+ * 2. Fetch network di background → perbarui UI diam-diam saat selesai
+ */
+function fetchDataFast(forceAnnounce = false) {
+  const hasCacheShown = showFromCache(forceAnnounce);
+  if (!hasCacheShown) {
+    // Pertama kali buka & belum ada cache → fetch blocking
+    console.log('[Init] Belum ada cache, fetch awal dari network...');
+    fetchData(forceAnnounce);
+  } else {
+    // Cache sudah ditampilkan → refresh network di background
+    refreshFromNetwork(forceAnnounce);
+  }
+}
+
+// ─── Inisialisasi & Interval ──────────────────────────────────────────────────────
+// Tampilkan cache instan → refresh network di background
+fetchDataFast();
+// Setiap 15 detik: perbarui data dari network tanpa mengosongkan layar
+setInterval(() => refreshFromNetwork(), 15000);
 
 // Fungsi untuk mengumumkan jadwal dengan suara
 function announceSchedule(jadwal, jamKe, shift, isKamis = false) {
@@ -637,7 +725,7 @@ function announceBreak(jamMulai, jamSelesai) {
 
 // Fungsi untuk umumkan jadwal sekarang
 function announceNow() {
-  fetchData(true);
+  fetchDataFast(true);
 }
 
 // Fungsi untuk berhenti mengumumkan
@@ -678,21 +766,21 @@ function adjustFont(change) {
 function adjustTime(offset) {
   timeOffset += offset;
   updateClock();
-  fetchData();
+  fetchDataFast();
 }
 
 // Fungsi baru untuk menyesuaikan waktu menit
 function adjustMinute(offset) {
   timeOffsetMinutes += offset;
   updateClock();
-  fetchData();
+  fetchDataFast();
 }
 
 // Fungsi untuk menyesuaikan hari
 function adjustDay(offset) {
   dayOffset += offset;
   updateClock();
-  fetchData();
+  fetchDataFast();
 }
 
 // Fungsi untuk memuat daftar suara dan mengisi dropdown
@@ -814,7 +902,7 @@ let lastInteractionTime = Date.now();
 // Refresh otomatis jika tidak ada interaksi selama 2 menit
 setInterval(() => {
   if (Date.now() - lastInteractionTime >= 120000) {
-    fetchData();
+    refreshFromNetwork();
   }
 }, 30000);
 
