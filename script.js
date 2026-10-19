@@ -762,25 +762,49 @@ function adjustFont(change) {
   });
 }
 
+/**
+ * Re-render tampilan dari data global yang SUDAH ADA di memori.
+ * Digunakan saat offset waktu/hari berubah — tidak perlu fetch apapun.
+ * Jika data global belum tersedia, fallback ke showFromCache.
+ */
+function refreshDisplayOnly() {
+  const hasGlobalData = globalDbAscData && globalDbGuruMapelData &&
+    globalKelasShiftData && globalBelData && globalBelKhususData;
+
+  if (hasGlobalData) {
+    // Re-process dari data yang sudah ada di memori — INSTAN
+    const { jam, hari, shift, timeNow, isKamis } = getCurrentTimeContext();
+    const cachedPiket = loadCache(CACHE_KEY_PIKET);
+    processAndDisplay(
+      globalDbAscData, globalDbGuruMapelData, globalKelasShiftData,
+      globalBelData, globalBelKhususData, cachedPiket,
+      hari, jam, shift, timeNow, isKamis, false
+    );
+  } else {
+    // Data global belum ada (belum pernah fetch) — gunakan cache
+    showFromCache();
+  }
+}
+
 // Fungsi untuk menyesuaikan waktu jam (dalam jam)
 function adjustTime(offset) {
   timeOffset += offset;
   updateClock();
-  fetchDataFast();
+  refreshDisplayOnly(); // Instan dari memori, tidak fetch
 }
 
 // Fungsi baru untuk menyesuaikan waktu menit
 function adjustMinute(offset) {
   timeOffsetMinutes += offset;
   updateClock();
-  fetchDataFast();
+  refreshDisplayOnly(); // Instan dari memori, tidak fetch
 }
 
 // Fungsi untuk menyesuaikan hari
 function adjustDay(offset) {
   dayOffset += offset;
   updateClock();
-  fetchDataFast();
+  refreshDisplayOnly(); // Instan dari memori, tidak fetch
 }
 
 // Fungsi untuk memuat daftar suara dan mengisi dropdown
