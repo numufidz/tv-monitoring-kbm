@@ -33,6 +33,16 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto&family=Rajdhani&family=Rubik:wght@700&display=swap"
     rel="stylesheet">
+  <!-- Registrasi Service Worker untuk dukungan offline -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[SW] Registered:', reg.scope))
+          .catch(err => console.warn('[SW] Gagal mendaftar:', err));
+      });
+    }
+  </script>
   <style>
     :root {
       --bg: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
@@ -240,6 +250,35 @@
       background: rgba(255, 255, 255, 0.15);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Status koneksi / cache indicator */
+    #connectionStatus {
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.4s ease;
+      letter-spacing: 0.3px;
+    }
+    #connectionStatus.status-online {
+      background: rgba(0, 200, 100, 0.15);
+      color: #00e676;
+      border: 1px solid rgba(0, 200, 100, 0.3);
+    }
+    #connectionStatus.status-offline {
+      background: rgba(255, 200, 0, 0.15);
+      color: #FFD700;
+      border: 1px solid rgba(255, 200, 0, 0.3);
+    }
+    #connectionStatus.status-loading {
+      background: rgba(180, 180, 180, 0.1);
+      color: #aaa;
+      border: 1px solid rgba(180,180,180,0.2);
     }
 
     /* Responsive adjustments untuk guru piket */
@@ -1073,7 +1112,7 @@
 
 <body>
   <div class="header-grid">
-    <img src="https://tv-monitoring-kbm.netlify.app/logo.png" alt="Logo MTs. An-Nur Bululawang">
+    <img src="logo.png" alt="Logo MTs. An-Nur Bululawang">
     <div class="kop">
       <b>MTs. AN-NUR BULULAWANG</b><br>
       TERAKREDITASI "A"<br>
@@ -1083,6 +1122,7 @@
       <div class="judul">E - JADWAL</div>
       <div id="clock">--:--:--</div>
       <div id="dayDate">Memuat tanggal...</div>
+      <div id="connectionStatus" class="status-loading">⚪ <span>Memuat data...</span></div>
     </div>
     <div class="header-kbm">
       <div class="shift" id="shiftKBM">KBM PUTRI</div>
